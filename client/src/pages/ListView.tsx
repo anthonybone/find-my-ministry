@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
-import { ministryApi } from '../services/api';
+import { ministryApi, MinistryType } from '../services/api';
 import { MinistryCard } from '../components/MinistryCard';
 import {
     FunnelIcon,
     MagnifyingGlassIcon
-} from '@heroicons/react/24/outline';
-
-export const ListView: React.FC = () => {
+} from '@heroicons/react/24/outline'; export const ListView: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [filters, setFilters] = useState({
+    const [filters, setFilters] = useState<{
+        type: MinistryType | '';
+        ageGroups: string[];
+        languages: string[];
+    }>({
         type: '',
         ageGroups: [],
         languages: []
@@ -91,7 +93,7 @@ export const ListView: React.FC = () => {
                                     <select
                                         className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                                         value={filters.type}
-                                        onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
+                                        onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value as MinistryType | '' }))}
                                     >
                                         <option value="">All Types</option>
                                         <option value="YOUTH_MINISTRY">Youth Ministry</option>

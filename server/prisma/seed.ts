@@ -94,12 +94,17 @@ async function main() {
 
     const createdParishes = await Promise.all(
         parishes.map(async (parish) => {
-            return await prisma.parish.upsert({
-                where: {
-                    name: parish.name
-                },
-                update: {},
-                create: {
+            // Check if parish exists first
+            const existingParish = await prisma.parish.findFirst({
+                where: { name: parish.name }
+            });
+
+            if (existingParish) {
+                return existingParish;
+            }
+
+            return await prisma.parish.create({
+                data: {
                     ...parish,
                     dioceseId: laDiocese.id,
                 },

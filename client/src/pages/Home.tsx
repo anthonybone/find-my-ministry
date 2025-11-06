@@ -5,7 +5,7 @@ import {
     MapIcon,
     ListBulletIcon,
     MagnifyingGlassIcon,
-    ChurchIcon,
+    BuildingLibraryIcon as ChurchIcon,
     UsersIcon,
     ClockIcon
 } from '@heroicons/react/24/outline';
@@ -26,7 +26,7 @@ export const Home: React.FC = () => {
     // Fetch parishes count
     const { data: parishesData } = useQuery(
         'parishes-count',
-        () => parishApi.getAll({ limit: 1 }),
+        () => parishApi.getAll({}),
         { refetchOnWindowFocus: false }
     );
 
