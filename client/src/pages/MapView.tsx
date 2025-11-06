@@ -26,6 +26,14 @@ const mapStyles = `
     .ministry-popup .leaflet-popup-content-wrapper {
         border-radius: 8px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    .ministry-popup .leaflet-popup-content {
+        margin: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
     }
     
     .ministry-popup .leaflet-popup-tip {
@@ -278,7 +286,7 @@ export const MapView: React.FC = () => {
                                 click: () => handleMarkerClick(ministry),
                             }}
                         >
-                            <Popup maxWidth={360} className="ministry-popup">
+                            <Popup maxWidth={400} className="ministry-popup">
                                 <div className="p-4">
                                     <div className="flex items-start justify-between mb-3">
                                         <h3 className="font-bold text-lg text-gray-900 flex-1 pr-2">
@@ -296,7 +304,7 @@ export const MapView: React.FC = () => {
                                             {ministry.parish.address}, {ministry.parish.city}
                                         </div>
                                         {ministry.description && (
-                                            <p className="text-sm text-gray-700 line-clamp-2 bg-gray-50 p-2 rounded border-l-3 border-primary-300">
+                                            <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded border-l-3 border-primary-300 leading-relaxed">
                                                 {ministry.description}
                                             </p>
                                         )}
