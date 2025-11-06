@@ -190,7 +190,7 @@ router.put('/:id', validateMinistry, async (req, res) => {
         res.json(ministry);
     } catch (error) {
         console.error('Error updating ministry:', error);
-        if (error.code === 'P2025') {
+        if (error instanceof Error && (error as any).code === 'P2025') {
             res.status(404).json({ error: 'Ministry not found' });
         } else {
             res.status(500).json({ error: 'Internal server error' });
@@ -210,7 +210,7 @@ router.delete('/:id', async (req, res) => {
         res.status(204).send();
     } catch (error) {
         console.error('Error deleting ministry:', error);
-        if (error.code === 'P2025') {
+        if (error instanceof Error && (error as any).code === 'P2025') {
             res.status(404).json({ error: 'Ministry not found' });
         } else {
             res.status(500).json({ error: 'Internal server error' });

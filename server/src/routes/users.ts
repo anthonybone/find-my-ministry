@@ -58,7 +58,7 @@ router.post('/', async (req, res) => {
         res.status(201).json(user);
     } catch (error) {
         console.error('Error creating user:', error);
-        if (error.code === 'P2002') {
+        if (error instanceof Error && (error as any).code === 'P2002') {
             res.status(400).json({ error: 'User with this email already exists' });
         } else {
             res.status(500).json({ error: 'Internal server error' });
@@ -84,9 +84,9 @@ router.put('/:id', async (req, res) => {
         res.json(user);
     } catch (error) {
         console.error('Error updating user:', error);
-        if (error.code === 'P2025') {
+        if (error instanceof Error && (error as any).code === 'P2025') {
             res.status(404).json({ error: 'User not found' });
-        } else if (error.code === 'P2002') {
+        } else if (error instanceof Error && (error as any).code === 'P2002') {
             res.status(400).json({ error: 'Email already in use' });
         } else {
             res.status(500).json({ error: 'Internal server error' });
@@ -106,7 +106,7 @@ router.delete('/:id', async (req, res) => {
         res.status(204).send();
     } catch (error) {
         console.error('Error deleting user:', error);
-        if (error.code === 'P2025') {
+        if (error instanceof Error && (error as any).code === 'P2025') {
             res.status(404).json({ error: 'User not found' });
         } else {
             res.status(500).json({ error: 'Internal server error' });

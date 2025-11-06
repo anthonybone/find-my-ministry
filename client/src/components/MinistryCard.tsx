@@ -29,6 +29,24 @@ const getAgeGroupDisplay = (ageGroups: string[]): string => {
 
 
 
+const getMinistryCardStyle = (type: string): string => {
+    const cardStyles: { [key: string]: string } = {
+        'YOUTH_MINISTRY': 'border-l-4 border-l-green-400',
+        'YOUNG_ADULT': 'border-l-4 border-l-green-400',
+        'ADULT_EDUCATION': 'border-l-4 border-l-indigo-400',
+        'BIBLE_STUDY': 'border-l-4 border-l-indigo-400',
+        'PRAYER_GROUP': 'border-l-4 border-l-yellow-400',
+        'SENIORS_MINISTRY': 'border-l-4 border-l-purple-400',
+        'FOOD_PANTRY': 'border-l-4 border-l-orange-400',
+        'COMMUNITY_SERVICE': 'border-l-4 border-l-orange-400',
+        'SOCIAL_JUSTICE': 'border-l-4 border-l-orange-400',
+        'MARRIAGE_FAMILY': 'border-l-4 border-l-pink-400',
+        'RCIA': 'border-l-4 border-l-indigo-400',
+        'RELIGIOUS_EDUCATION': 'border-l-4 border-l-indigo-400'
+    };
+    return cardStyles[type] || 'border-l-4 border-l-gray-400';
+};
+
 const getMinistryBadgeClass = (type: string): string => {
     const badgeClasses: { [key: string]: string } = {
         'YOUTH_MINISTRY': 'ministry-badge youth',
@@ -49,7 +67,7 @@ const getMinistryBadgeClass = (type: string): string => {
 
 export const MinistryCard: React.FC<MinistryCardProps> = ({ ministry }) => {
     return (
-        <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6">
+        <div className={`ministry-card ${getMinistryCardStyle(ministry.type)}`}>
             <div className="flex items-start justify-between mb-4">
                 <div>
                     <span className={getMinistryBadgeClass(ministry.type)}>
@@ -57,42 +75,47 @@ export const MinistryCard: React.FC<MinistryCardProps> = ({ ministry }) => {
                     </span>
                 </div>
                 {ministry.requiresRegistration && (
-                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                    <span className="text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-medium shadow-sm">
                         Registration Required
                     </span>
                 )}
             </div>
 
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                <Link
-                    to={`/ministry/${ministry.id}`}
-                    className="hover:text-primary-600 transition-colors"
-                >
-                    {ministry.name}
-                </Link>
-            </h3>
+            <div className="mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-1 leading-tight">
+                    <Link
+                        to={`/ministry/${ministry.id}`}
+                        className="hover:text-primary-600 transition-colors"
+                    >
+                        {ministry.name}
+                    </Link>
+                </h3>
+                <div className="flex items-center text-sm text-gray-500">
+                    <MapPinIcon className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+                    <span className="font-medium text-gray-600 truncate">
+                        {ministry.parish.name}
+                    </span>
+                    <span className="mx-1.5 text-gray-400">•</span>
+                    <span className="text-gray-500 truncate">
+                        {ministry.parish.city}
+                    </span>
+                </div>
+            </div>
 
             {ministry.description && (
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
                     {ministry.description}
                 </p>
             )}
 
             <div className="space-y-2 mb-4">
                 <div className="flex items-center text-sm text-gray-600">
-                    <MapPinIcon className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="truncate">
-                        {ministry.parish.name}, {ministry.parish.city}
-                    </span>
-                </div>
-
-                <div className="flex items-center text-sm text-gray-600">
-                    <ClockIcon className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <ClockIcon className="h-4 w-4 mr-2 flex-shrink-0 text-gray-400" />
                     <span>{formatScheduleDisplay(ministry.schedule)}</span>
                 </div>
 
                 <div className="flex items-center text-sm text-gray-600">
-                    <UsersIcon className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <UsersIcon className="h-4 w-4 mr-2 flex-shrink-0 text-gray-400" />
                     <span>{getAgeGroupDisplay(ministry.ageGroups)}</span>
                 </div>
             </div>
@@ -121,7 +144,7 @@ export const MinistryCard: React.FC<MinistryCardProps> = ({ ministry }) => {
 
                 <Link
                     to={`/ministry/${ministry.id}`}
-                    className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                    className="text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg"
                 >
                     Learn More →
                 </Link>

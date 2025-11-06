@@ -50,7 +50,7 @@ body {
 
 /* Ministry type badge styles */
 .ministry-badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm;
 }
 
 .ministry-badge.youth {
@@ -84,3 +84,16 @@ body {
 .ministry-badge.default {
     @apply bg-gray-100 text-gray-800;
 }
+
+/* Ministry card enhancements */
+.ministry-card {
+    @apply bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 p-6 border border-gray-100;
+    background: linear-gradient(145deg, #ffffff 0%, #fafafa 100%);
+}
+
+.ministry-card:hover {
+    @apply transform -translate-y-1;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Enhanced ministry badges */
