@@ -278,14 +278,14 @@ export const MapView: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="h-screen">
+            <div className="h-[calc(100vh-4rem)]">
                 <LoadingState message="Loading ministries..." size="lg" />
             </div>
         );
     }
 
     return (
-        <div className="h-screen relative">
+        <div className="h-[calc(100vh-4rem)] relative">
             <MapContainer
                 center={LA_CENTER}
                 zoom={10}
