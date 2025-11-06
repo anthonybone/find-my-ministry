@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Diocese {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  location    String
+  website     String?
+  phone       String?
+  email       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  parishes    Parish[]
+  
+  @@map("dioceses")
+}
+
+model Parish {
+  id          String      @id @default(cuid())
+  name        String
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  latitude    Float
+  longitude   Float
+  phone       String?
+  email       String?
+  website     String?
+  pastor      String?
+  massSchedule Json?     // Flexible JSON structure for mass times
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  dioceseId   String
+  diocese     Diocese     @relation(fields: [dioceseId], references: [id])
+  ministries  Ministry[]
+  
+  @@map("parishes")
+}
+
+model Ministry {
+  id            String        @id @default(cuid())
+  name          String
+  description   String?
+  type          MinistryType
+  ageGroups     AgeGroup[]
+  languages     String[]      // Array of language codes (e.g., ["en", "es", "fr"])
+  
+  // Schedule information
+  schedule      Json          // Flexible schedule structure
+  startDate     DateTime?
+  endDate       DateTime?
+  isOngoing     Boolean       @default(true)
+  
+  // Contact and registration
+  contactName   String?
+  contactPhone  String?
+  contactEmail  String?
+  requiresRegistration Boolean @default(false)
+  registrationDeadline DateTime?
+  maxParticipants Int?
+  currentParticipants Int? @default(0)
+  
+  // Accessibility and requirements
+  isAccessible  Boolean       @default(true)
+  requirements  String[]      // Array of requirements
+  materials     String[]      // Materials needed/provided
+  cost          String?       // Cost information
+  
+  // Status
+  isActive      Boolean       @default(true)
+  isPublic      Boolean       @default(true)
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  parishId      String
+  parish        Parish        @relation(fields: [parishId], references: [id])
+  
+  @@map("ministries")
+}
+
+enum MinistryType {
+  YOUTH_MINISTRY
+  YOUNG_ADULT
+  ADULT_EDUCATION
+  BIBLE_STUDY
+  PRAYER_GROUP
+  CHOIR_MUSIC
+  LITURGICAL_MINISTRY
+  SOCIAL_JUSTICE
+  COMMUNITY_SERVICE
+  FOOD_PANTRY
+  SENIORS_MINISTRY
+  MENS_GROUP
+  WOMENS_GROUP
+  MARRIAGE_FAMILY
+  BEREAVEMENT
+  ADDICTION_RECOVERY
+  RELIGIOUS_EDUCATION
+  RCIA
+  CONFIRMATION_PREP
+  FIRST_COMMUNION_PREP
+  BAPTISM_PREP
+  MARRIAGE_PREP
+  KNIGHTS_OF_COLUMBUS
+  ALTAR_SOCIETY
+  ST_VINCENT_DE_PAUL
+  PASTORAL_CARE
+  HOSPITALITY
+  MAINTENANCE_GROUNDS
+  FUNDRAISING
+  RETREAT_MINISTRY
+  MISSION_OUTREACH
+  OTHER
+}
+
+enum AgeGroup {
+  CHILDREN          // 0-12
+  TEENAGERS         // 13-17
+  YOUNG_ADULTS      // 18-35
+  ADULTS            // 36-64
+  SENIORS           // 65+
+  FAMILIES          // Mixed ages
+  ALL_AGES          // Open to everyone
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  PARISH_ADMIN
+  USER
+}
