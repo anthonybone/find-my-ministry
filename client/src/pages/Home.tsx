@@ -1,44 +1,25 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from 'react-query';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import {
     MapIcon,
     ListBulletIcon,
-    MagnifyingGlassIcon,
     BuildingLibraryIcon as ChurchIcon,
     UsersIcon,
     ClockIcon
 } from '@heroicons/react/24/outline';
-import { ministryApi, parishApi } from '../services/api';
 import { MinistryCard } from '../components/MinistryCard';
+import { useMinistryData, useParishData } from '../hooks/useMinistryData';
+import { useSearch } from '../hooks/useSearch';
+import { SearchBar } from '../components/common/SearchBar';
 
 export const Home: React.FC = () => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const navigate = useNavigate();
+    const { searchQuery, setSearchQuery, handleSearch } = useSearch();
 
     // Fetch recent ministries for homepage (exclude placeholders by default)
-    const { data: ministriesData } = useQuery(
-        'recent-ministries',
-        () => ministryApi.getAll({
-            limit: 6,
-            includePlaceholders: false
-        }),
-        { refetchOnWindowFocus: false }
-    );
+    const { data: ministriesData } = useMinistryData({ includePlaceholders: false });
 
     // Fetch parishes count
-    const { data: parishesData } = useQuery(
-        'parishes-count',
-        () => parishApi.getAll({}),
-        { refetchOnWindowFocus: false }
-    );
-
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (searchQuery.trim()) {
-            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        }
-    };
+    const { data: parishesData } = useParishData();
 
     const stats = [
         {
@@ -78,26 +59,13 @@ export const Home: React.FC = () => {
 
                         {/* Search Bar */}
                         <div className="max-w-2xl mx-auto">
-                            <form onSubmit={handleSearch} className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <MagnifyingGlassIcon className="h-6 w-6 text-gray-400" />
-                                </div>
-                                <input
-                                    type="text"
-                                    className="block w-full pl-12 pr-4 py-4 text-lg border-0 rounded-xl shadow-lg focus:ring-2 focus:ring-white focus:ring-opacity-50 focus:outline-none"
-                                    placeholder="Search by ministry type, parish, or location..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                                <button
-                                    type="submit"
-                                    className="absolute inset-y-0 right-0 pr-4 flex items-center"
-                                >
-                                    <span className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-                                        Search
-                                    </span>
-                                </button>
-                            </form>
+                            <SearchBar
+                                searchQuery={searchQuery}
+                                onSearchChange={setSearchQuery}
+                                onSearch={handleSearch}
+                                placeholder="Search by ministry type, parish, or location..."
+                                className="text-lg"
+                            />
                         </div>
 
                         {/* Action Buttons */}
@@ -186,7 +154,9 @@ export const Home: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="text-center">
                             <div className="bg-primary-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <MagnifyingGlassIcon className="h-8 w-8 text-white" />
+                                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                </svg>
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 mb-2">
                                 1. Search & Discover

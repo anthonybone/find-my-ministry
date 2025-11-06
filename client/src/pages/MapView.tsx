@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl, useMap } from 'react-leaflet';
-import { useQuery } from 'react-query';
 import L from 'leaflet';
-import { ministryApi, Ministry } from '../services/api';
+import { Ministry } from '../services/api';
 import { MinistryCard } from '../components/MinistryCard';
+import { useMinistryData } from '../hooks/useMinistryData';
+import { LoadingState } from '../components/common/LoadingStates';
+import { getMinistryTypeDisplay } from '../utils/ministryUtils';
 import {
     MagnifyingGlassPlusIcon,
     MagnifyingGlassMinusIcon,
@@ -179,14 +181,9 @@ export const MapView: React.FC = () => {
     const [selectedMinistry, setSelectedMinistry] = useState<Ministry | null>(null);
     const mapRef = useRef<L.Map>(null);
 
-    const { data: ministriesData, isLoading } = useQuery(
-        'map-ministries',
-        () => ministryApi.getAll({
-            limit: 100,
-            includePlaceholders: process.env.NODE_ENV === 'development' && localStorage.getItem('showPlaceholders') === 'true'
-        }),
-        { refetchOnWindowFocus: false }
-    );
+    const { data: ministriesData, isLoading } = useMinistryData({
+        includePlaceholders: process.env.NODE_ENV === 'development' && localStorage.getItem('showPlaceholders') === 'true'
+    });
 
     const handleMarkerClick = (ministry: Ministry) => {
         setSelectedMinistry(ministry);
@@ -222,11 +219,8 @@ export const MapView: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading ministries...</p>
-                </div>
+            <div className="h-screen">
+                <LoadingState message="Loading ministries..." size="lg" />
             </div>
         );
     }
@@ -292,7 +286,7 @@ export const MapView: React.FC = () => {
                                             {ministry.name}
                                         </h3>
                                         <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full whitespace-nowrap">
-                                            {ministry.type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                                            {getMinistryTypeDisplay(ministry.type)}
                                         </span>
                                     </div>
                                     <div className="space-y-2">
@@ -307,7 +301,7 @@ export const MapView: React.FC = () => {
                                         )}
                                         <div className="flex items-center justify-between pt-2">
                                             <div className="text-xs text-gray-500">
-                                                {ministry.ageGroups.join(', ').replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                                                {ministry.ageGroups.join(', ')}
                                             </div>
                                             <button
                                                 onClick={() => setSelectedMinistry(ministry)}

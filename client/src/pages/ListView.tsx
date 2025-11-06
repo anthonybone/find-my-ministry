@@ -1,73 +1,58 @@
-import React, { useState } from 'react';
-import { useQuery } from 'react-query';
-import { ministryApi, MinistryType } from '../services/api';
+import React from 'react';
+import { MinistryType } from '../services/api';
 import { MinistryCard } from '../components/MinistryCard';
+import { useMinistryData } from '../hooks/useMinistryData';
+import { useSearch } from '../hooks/useSearch';
+import { useDevMode, useFilters } from '../hooks/useCommon';
+import { SearchBar } from '../components/common/SearchBar';
+import { ToggleSwitch } from '../components/common/ToggleSwitch';
+import { LoadingState, ErrorState } from '../components/common/LoadingStates';
 import {
-    FunnelIcon,
-    MagnifyingGlassIcon
-} from '@heroicons/react/24/outline'; export const ListView: React.FC = () => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filters, setFilters] = useState<{
-        type: MinistryType | '';
-        ageGroups: string[];
-        languages: string[];
-    }>({
-        type: '',
-        ageGroups: [],
-        languages: []
-    });
-    const [showFilters, setShowFilters] = useState(false);
-    const [showPlaceholders, setShowPlaceholders] = useState(false);
-    const [isDevMode, setIsDevMode] = useState(() =>
-        process.env.NODE_ENV === 'development' ||
-        window.location.hostname === 'localhost' ||
-        localStorage.getItem('devMode') === 'true' ||
-        new URLSearchParams(window.location.search).get('dev') === 'true'
-    );
+    FunnelIcon
+} from '@heroicons/react/24/outline';
+
+export const ListView: React.FC = () => {
+    const { searchQuery, setSearchQuery, handleSearch } = useSearch();
+    const { isDevMode, toggleDevMode } = useDevMode();
+
+    const initialFilters = {
+        type: '' as MinistryType | '',
+        ageGroups: [] as string[],
+        languages: [] as string[]
+    };
+
+    const {
+        filters,
+        updateFilter,
+        resetFilters,
+        showFilters,
+        toggleFiltersVisibility
+    } = useFilters(initialFilters);
+
+    const [showPlaceholders, setShowPlaceholders] = React.useState(false);
 
     // Keyboard shortcut to toggle dev mode (Ctrl+Shift+D)
     React.useEffect(() => {
         const handleKeyPress = (e: KeyboardEvent) => {
             if (e.ctrlKey && e.shiftKey && e.key === 'D') {
                 e.preventDefault();
-                const newDevMode = !localStorage.getItem('devMode') || localStorage.getItem('devMode') !== 'true';
-                if (newDevMode) {
-                    localStorage.setItem('devMode', 'true');
-                } else {
-                    localStorage.removeItem('devMode');
-                }
-                setIsDevMode(newDevMode || process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost');
-                console.log('🔧 Dev Mode:', newDevMode ? 'ENABLED' : 'DISABLED');
+                toggleDevMode();
+                console.log('🔧 Dev Mode:', !isDevMode ? 'ENABLED' : 'DISABLED');
             }
         };
 
         window.addEventListener('keydown', handleKeyPress);
         return () => window.removeEventListener('keydown', handleKeyPress);
-    }, []); const { data: ministriesData, isLoading } = useQuery(
-        ['ministries', searchQuery, filters, showPlaceholders],
-        () => ministryApi.getAll({
-            query: searchQuery || undefined,
-            type: filters.type || undefined,
-            ageGroups: filters.ageGroups.length > 0 ? filters.ageGroups : undefined,
-            languages: filters.languages.length > 0 ? filters.languages : undefined,
-            includePlaceholders: showPlaceholders,
-            limit: 50
-        }),
-        { refetchOnWindowFocus: false }
-    );
+    }, [isDevMode, toggleDevMode]);
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        // The query will automatically refetch due to dependencies
-    };
+    const { data: ministriesData, isLoading } = useMinistryData({
+        includePlaceholders: showPlaceholders
+    });
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading ministries...</p>
-                </div>
+            <div className="min-h-screen bg-gray-50">
+                <LoadingState message="Loading ministries..." size="lg" />
             </div>
         );
     }
@@ -83,24 +68,19 @@ import {
 
                     {/* Search and Filters */}
                     <div className="flex flex-col lg:flex-row gap-4">
-                        <form onSubmit={handleSearch} className="flex-1">
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                                </div>
-                                <input
-                                    type="text"
-                                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
-                                    placeholder="Search ministries..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-                        </form>
+                        <div className="flex-1">
+                            <SearchBar
+                                searchQuery={searchQuery}
+                                onSearchChange={setSearchQuery}
+                                onSearch={handleSearch}
+                                placeholder="Search ministries..."
+                                className="w-full"
+                            />
+                        </div>
 
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setShowFilters(!showFilters)}
+                                onClick={toggleFiltersVisibility}
                                 className="inline-flex items-center px-4 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                             >
                                 <FunnelIcon className="h-5 w-5 mr-2" />
@@ -110,7 +90,7 @@ import {
                             <button
                                 onClick={() => {
                                     setSearchQuery('');
-                                    setFilters({ type: '', ageGroups: [], languages: [] });
+                                    resetFilters();
                                     setShowPlaceholders(false);
                                 }}
                                 className="inline-flex items-center px-4 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
@@ -126,27 +106,14 @@ import {
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-medium text-gray-900">Filter Ministries</h3>
                                 {isDevMode && (
-                                    <div className="flex items-center space-x-2">
-                                        <span className="text-sm text-gray-600">Show Test Data:</span>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                className="sr-only"
-                                                checked={showPlaceholders}
-                                                onChange={(e) => setShowPlaceholders(e.target.checked)}
-                                            />
-                                            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus-within:ring-2 focus-within:ring-offset-2 ${showPlaceholders
-                                                    ? 'bg-green-500 focus-within:ring-green-500'
-                                                    : 'bg-gray-300 focus-within:ring-gray-300'
-                                                }`}>
-                                                <span
-                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${showPlaceholders ? 'translate-x-6' : 'translate-x-1'
-                                                        }`}
-                                                />
-                                            </div>
-                                        </label>
+                                    <div className="flex items-center space-x-3">
+                                        <ToggleSwitch
+                                            enabled={showPlaceholders}
+                                            onToggle={() => setShowPlaceholders(!showPlaceholders)}
+                                            label="Show Test Data"
+                                        />
                                         <span className="text-xs text-orange-600 font-medium">DEV MODE</span>
-                                        <span className="text-xs text-gray-500 ml-2" title="Press Ctrl+Shift+D to toggle dev mode">
+                                        <span className="text-xs text-gray-500" title="Press Ctrl+Shift+D to toggle dev mode">
                                             (Ctrl+Shift+D)
                                         </span>
                                     </div>
@@ -160,7 +127,7 @@ import {
                                     <select
                                         className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                                         value={filters.type}
-                                        onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value as MinistryType | '' }))}
+                                        onChange={(e) => updateFilter('type', e.target.value as MinistryType | '')}
                                     >
                                         <option value="">All Types</option>
                                         <option value="YOUTH_MINISTRY">Youth Ministry</option>
@@ -241,7 +208,7 @@ import {
                         <button
                             onClick={() => {
                                 setSearchQuery('');
-                                setFilters({ type: '', ageGroups: [], languages: [] });
+                                resetFilters();
                                 setShowPlaceholders(false);
                             }}
                             className="text-primary-600 hover:text-primary-700 font-medium"

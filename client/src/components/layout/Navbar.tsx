@@ -1,17 +1,11 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlassIcon, MapIcon, ListBulletIcon } from '@heroicons/react/24/outline';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { MapIcon, ListBulletIcon } from '@heroicons/react/24/outline';
+import { useSearch } from '../../hooks/useSearch';
+import { SearchBar } from '../common/SearchBar';
 
 export const Navbar: React.FC = () => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const navigate = useNavigate();
-
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (searchQuery.trim()) {
-            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        }
-    };
+    const { searchQuery, setSearchQuery, handleSearch } = useSearch();
 
     return (
         <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -31,18 +25,12 @@ export const Navbar: React.FC = () => {
 
                     {/* Search Bar */}
                     <div className="flex-1 max-w-lg mx-8">
-                        <form onSubmit={handleSearch} className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                            </div>
-                            <input
-                                type="text"
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
-                                placeholder="Search ministries, parishes, or locations..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </form>
+                        <SearchBar
+                            searchQuery={searchQuery}
+                            onSearchChange={setSearchQuery}
+                            onSearch={handleSearch}
+                            placeholder="Search ministries, parishes, or locations..."
+                        />
                     </div>
 
                     {/* Navigation Links */}

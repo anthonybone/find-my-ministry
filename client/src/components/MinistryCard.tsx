@@ -8,48 +8,11 @@ import {
     EnvelopeIcon
 } from '@heroicons/react/24/outline';
 import { Ministry } from '../services/api';
+import { getMinistryTypeDisplay, formatScheduleDisplay } from '../utils/ministryUtils';
 
 interface MinistryCardProps {
     ministry: Ministry;
 }
-
-const getMinistryTypeDisplay = (type: string): string => {
-    const typeMap: { [key: string]: string } = {
-        'YOUTH_MINISTRY': 'Youth Ministry',
-        'YOUNG_ADULT': 'Young Adult',
-        'ADULT_EDUCATION': 'Adult Education',
-        'BIBLE_STUDY': 'Bible Study',
-        'PRAYER_GROUP': 'Prayer Group',
-        'CHOIR_MUSIC': 'Choir & Music',
-        'LITURGICAL_MINISTRY': 'Liturgical Ministry',
-        'SOCIAL_JUSTICE': 'Social Justice',
-        'COMMUNITY_SERVICE': 'Community Service',
-        'FOOD_PANTRY': 'Food Pantry',
-        'SENIORS_MINISTRY': 'Seniors Ministry',
-        'MENS_GROUP': "Men's Group",
-        'WOMENS_GROUP': "Women's Group",
-        'MARRIAGE_FAMILY': 'Marriage & Family',
-        'BEREAVEMENT': 'Bereavement',
-        'ADDICTION_RECOVERY': 'Addiction Recovery',
-        'RELIGIOUS_EDUCATION': 'Religious Education',
-        'RCIA': 'RCIA',
-        'CONFIRMATION_PREP': 'Confirmation Prep',
-        'FIRST_COMMUNION_PREP': 'First Communion Prep',
-        'BAPTISM_PREP': 'Baptism Prep',
-        'MARRIAGE_PREP': 'Marriage Prep',
-        'KNIGHTS_OF_COLUMBUS': 'Knights of Columbus',
-        'ALTAR_SOCIETY': 'Altar Society',
-        'ST_VINCENT_DE_PAUL': 'St. Vincent de Paul',
-        'PASTORAL_CARE': 'Pastoral Care',
-        'HOSPITALITY': 'Hospitality',
-        'MAINTENANCE_GROUNDS': 'Maintenance & Grounds',
-        'FUNDRAISING': 'Fundraising',
-        'RETREAT_MINISTRY': 'Retreat Ministry',
-        'MISSION_OUTREACH': 'Mission & Outreach',
-        'OTHER': 'Other'
-    };
-    return typeMap[type] || type;
-};
 
 const getAgeGroupDisplay = (ageGroups: string[]): string => {
     const ageGroupMap: { [key: string]: string } = {
@@ -64,19 +27,7 @@ const getAgeGroupDisplay = (ageGroups: string[]): string => {
     return ageGroups.map(ag => ageGroupMap[ag] || ag).join(', ');
 };
 
-const getScheduleDisplay = (schedule: any): string => {
-    if (!schedule) return 'Schedule varies';
 
-    if (schedule.weekly) {
-        return `${schedule.weekly.day}s at ${schedule.weekly.time}`;
-    }
-
-    if (schedule.monthly) {
-        return `${schedule.monthly.day} at ${schedule.monthly.time}`;
-    }
-
-    return 'See details for schedule';
-};
 
 const getMinistryBadgeClass = (type: string): string => {
     const badgeClasses: { [key: string]: string } = {
@@ -137,7 +88,7 @@ export const MinistryCard: React.FC<MinistryCardProps> = ({ ministry }) => {
 
                 <div className="flex items-center text-sm text-gray-600">
                     <ClockIcon className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span>{getScheduleDisplay(ministry.schedule)}</span>
+                    <span>{formatScheduleDisplay(ministry.schedule)}</span>
                 </div>
 
                 <div className="flex items-center text-sm text-gray-600">
