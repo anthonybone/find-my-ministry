@@ -252,6 +252,43 @@ export const Home: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Saint Carlo Acutis Easter Egg */}
+            <div className="fixed bottom-4 right-4 z-50">
+                <a
+                    href="https://www.miracolieucaristici.org/en/liste/list.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block transform transition-all duration-300 hover:scale-110 hover:rotate-3"
+                    title="Discover Eucharistic Miracles - Saint Carlo Acutis"
+                >
+                    <div className="relative">
+                        {/* Glow effect on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full blur-md opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
+
+                        {/* Saint Carlo Acutis Image */}
+                        <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-lg bg-white">
+                            <img
+                                src="/images/saint-carlo-acutis.png"
+                                alt="Saint Carlo Acutis"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                onError={(e) => {
+                                    // Fallback to SVG placeholder if PNG doesn't exist
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/images/saint-carlo-acutis-placeholder.svg';
+                                    target.onerror = null; // Prevent infinite loop
+                                }}
+                            />
+                        </div>
+
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
+                            Eucharistic Miracles
+                            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
     );
 };
