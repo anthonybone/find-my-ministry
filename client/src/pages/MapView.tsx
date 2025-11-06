@@ -185,16 +185,62 @@ const ZoomIndicator: React.FC = () => {
     );
 };
 
+// Component to handle map events
+const MapEventHandler: React.FC<{ onMapClick: () => void }> = ({ onMapClick }) => {
+    const map = useMap();
+
+    React.useEffect(() => {
+        map.on('click', onMapClick);
+        return () => {
+            map.off('click', onMapClick);
+        };
+    }, [map, onMapClick]);
+
+    return null;
+};
+
 export const MapView: React.FC = () => {
     const [selectedMinistry, setSelectedMinistry] = useState<Ministry | null>(null);
+    const [selectedParish, setSelectedParish] = useState<string | null>(null);
     const mapRef = useRef<L.Map>(null);
 
     const { data: ministriesData, isLoading } = useMinistryData({
         includePlaceholders: process.env.NODE_ENV === 'development' && localStorage.getItem('showPlaceholders') === 'true'
     });
 
+    // Calculate unique parishes and ministry counts
+    const uniqueParishes = React.useMemo(() => {
+        if (!ministriesData?.ministries) return [];
+        const parishMap = new Map();
+        ministriesData.ministries.forEach(ministry => {
+            const parishKey = ministry.parish.id;
+            if (!parishMap.has(parishKey)) {
+                parishMap.set(parishKey, {
+                    ...ministry.parish,
+                    ministryCount: 0
+                });
+            }
+            parishMap.get(parishKey).ministryCount++;
+        });
+        return Array.from(parishMap.values());
+    }, [ministriesData]);
+
+    const displayedMinistryCount = React.useMemo(() => {
+        if (!selectedParish) {
+            return ministriesData?.ministries?.length || 0;
+        }
+        return ministriesData?.ministries?.filter(m => m.parish.id === selectedParish).length || 0;
+    }, [ministriesData, selectedParish]);
+
+    const selectedParishName = React.useMemo(() => {
+        if (!selectedParish) return null;
+        const parish = uniqueParishes.find(p => p.id === selectedParish);
+        return parish?.name || null;
+    }, [selectedParish, uniqueParishes]);
+
     const handleMarkerClick = (ministry: Ministry) => {
-        // Just zoom to marker when clicked, don't show details automatically
+        // Set selected parish and zoom to marker when clicked
+        setSelectedParish(ministry.parish.id);
         if (mapRef.current) {
             mapRef.current.setView([ministry.parish.latitude, ministry.parish.longitude], 14, {
                 animate: true,
@@ -216,12 +262,18 @@ export const MapView: React.FC = () => {
     };
 
     const handleResetView = () => {
+        setSelectedParish(null);
         if (mapRef.current) {
             mapRef.current.setView(LA_CENTER, 10, {
                 animate: true,
                 duration: 0.8
             });
         }
+    };
+
+    const handleMapClick = () => {
+        // Deselect parish when clicking on empty map area
+        setSelectedParish(null);
     };
 
     if (isLoading) {
@@ -247,9 +299,11 @@ export const MapView: React.FC = () => {
                 dragging={true}
                 keyboard={true}
                 touchZoom={true}
+
             >
                 <ZoomControl position="bottomright" />
                 <ZoomIndicator />
+                <MapEventHandler onMapClick={handleMapClick} />
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -379,13 +433,29 @@ export const MapView: React.FC = () => {
             {/* Map Info Panel */}
             <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-4 z-[1000] max-w-xs">
                 <h3 className="font-semibold mb-2 text-sm">🗺️ Interactive Map</h3>
-                <p className="text-sm text-gray-600 mb-2">
-                    <span className="font-medium text-green-600">{ministriesData?.ministries?.length || 0}</span> ministries found
-                </p>
+                <div className="text-sm text-gray-600 mb-2 space-y-1">
+                    <div>
+                        <span className="font-medium text-green-600">{displayedMinistryCount}</span> ministries
+                        {selectedParish && selectedParishName && (
+                            <span className="text-blue-600 font-medium"> in {selectedParishName}</span>
+                        )}
+                    </div>
+                    <div>
+                        <span className="font-medium text-blue-600">{uniqueParishes.length}</span> parishes total
+                    </div>
+                    {selectedParish && (
+                        <button
+                            onClick={() => setSelectedParish(null)}
+                            className="text-xs text-gray-500 hover:text-gray-700 underline"
+                        >
+                            Show all ministries
+                        </button>
+                    )}
+                </div>
                 <div className="text-xs text-gray-500 space-y-1">
-                    <div>📍 Click markers for preview</div>
-                    <div>� Click "View Details" for full info</div>
-                    <div>�️ Drag to pan around</div>
+                    <div>📍 Click markers to select parish</div>
+                    <div>📋 Click "View Details" for full info</div>
+                    <div>🗺️ Drag to pan around</div>
                     <div>🔍 Scroll wheel to zoom</div>
                 </div>
             </div>
