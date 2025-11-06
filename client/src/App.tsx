@@ -4,6 +4,8 @@ import { Navbar } from './components/layout/Navbar';
 import { Home } from './pages/Home';
 import { MapView } from './pages/MapView';
 import { ListView } from './pages/ListView';
+import { ParishList } from './pages/ParishList';
+import { MeetingTimesSearch } from './pages/MeetingTimesSearch';
 import { MinistryDetail } from './pages/MinistryDetail';
 import { ParishDetail } from './pages/ParishDetail';
 import { SearchResults } from './pages/SearchResults';
@@ -17,6 +19,8 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/map" element={<MapView />} />
                     <Route path="/list" element={<ListView />} />
+                    <Route path="/parishes" element={<ParishList />} />
+                    <Route path="/meeting-times" element={<MeetingTimesSearch />} />
                     <Route path="/ministry/:id" element={<MinistryDetail />} />
                     <Route path="/parish/:id" element={<ParishDetail />} />
                     <Route path="/search" element={<SearchResults />} />

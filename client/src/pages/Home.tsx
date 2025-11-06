@@ -93,17 +93,77 @@ export const Home: React.FC = () => {
             <div className="bg-white py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {stats.map((stat) => (
-                            <div key={stat.name} className="text-center">
-                                <div className="flex justify-center mb-4">
-                                    <stat.icon className={`h-12 w-12 ${stat.color}`} />
+                        {stats.map((stat, index) => {
+                            // Make the first stat (Active Ministries) clickable
+                            if (index === 0) {
+                                return (
+                                    <Link
+                                        key={stat.name}
+                                        to="/list"
+                                        className="text-center group cursor-pointer transform transition-all duration-200 hover:scale-105 hover:shadow-lg rounded-lg p-6 hover:bg-gray-50"
+                                    >
+                                        <div className="flex justify-center mb-4">
+                                            <stat.icon className={`h-12 w-12 ${stat.color} group-hover:scale-110 transition-transform`} />
+                                        </div>
+                                        <div className="text-3xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+                                            {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+                                        </div>
+                                        <div className="text-gray-600 group-hover:text-gray-800 transition-colors">{stat.name}</div>
+                                    </Link>
+                                );
+                            }
+
+                            // Make the second stat (Parishes) clickable
+                            if (index === 1) {
+                                return (
+                                    <Link
+                                        key={stat.name}
+                                        to="/parishes"
+                                        className="text-center group cursor-pointer transform transition-all duration-200 hover:scale-105 hover:shadow-lg rounded-lg p-6 hover:bg-gray-50"
+                                    >
+                                        <div className="flex justify-center mb-4">
+                                            <stat.icon className={`h-12 w-12 ${stat.color} group-hover:scale-110 transition-transform`} />
+                                        </div>
+                                        <div className="text-3xl font-bold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
+                                            {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+                                        </div>
+                                        <div className="text-gray-600 group-hover:text-gray-800 transition-colors">{stat.name}</div>
+                                    </Link>
+                                );
+                            }
+
+                            // Make the third stat (Meeting Times) clickable
+                            if (index === 2) {
+                                return (
+                                    <Link
+                                        key={stat.name}
+                                        to="/meeting-times"
+                                        className="text-center group cursor-pointer transform transition-all duration-200 hover:scale-105 hover:shadow-lg rounded-lg p-6 hover:bg-gray-50"
+                                    >
+                                        <div className="flex justify-center mb-4">
+                                            <stat.icon className={`h-12 w-12 ${stat.color} group-hover:scale-110 transition-transform`} />
+                                        </div>
+                                        <div className="text-3xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                                            {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+                                        </div>
+                                        <div className="text-gray-600 group-hover:text-gray-800 transition-colors">{stat.name}</div>
+                                    </Link>
+                                );
+                            }
+
+                            // Regular non-clickable stats for other items
+                            return (
+                                <div key={stat.name} className="text-center">
+                                    <div className="flex justify-center mb-4">
+                                        <stat.icon className={`h-12 w-12 ${stat.color}`} />
+                                    </div>
+                                    <div className="text-3xl font-bold text-gray-900 mb-2">
+                                        {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+                                    </div>
+                                    <div className="text-gray-600">{stat.name}</div>
                                 </div>
-                                <div className="text-3xl font-bold text-gray-900 mb-2">
-                                    {stat.value.toLocaleString()}
-                                </div>
-                                <div className="text-gray-600">{stat.name}</div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </div>

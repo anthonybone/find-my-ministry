@@ -18,23 +18,23 @@ export const MinistryDetail: React.FC = () => {
                         onClick={handleBack}
                         className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                     >
-                        <svg 
-                            className="w-4 h-4 mr-2" 
-                            fill="none" 
-                            stroke="currentColor" 
+                        <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
                             viewBox="0 0 24 24"
                         >
-                            <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={2} 
-                                d="M15 19l-7-7 7-7" 
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 19l-7-7 7-7"
                             />
                         </svg>
                         Back
                     </button>
                 </div>
-                
+
                 <div className="bg-white rounded-lg shadow-lg p-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-4">
                         Ministry Detail Page
