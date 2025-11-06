@@ -114,12 +114,12 @@ async function main() {
 
     console.log('✅ Created/found parishes');
 
-    // Sample ministries for each parish
-    const ministryTemplates = [
+    // PLACEHOLDER ministries for testing (FAKE DATA - DO NOT USE)
+    const ministryPlaceholders = [
         {
-            name: 'Youth Ministry',
+            name: '[PLACEHOLDER] Youth Ministry',
             type: MinistryType.YOUTH_MINISTRY,
-            description: 'Faith formation and community building for teenagers in grades 9-12. Activities include retreats, service projects, and social events.',
+            description: '[FAKE DATA] Generic youth ministry description for testing purposes only.',
             ageGroups: [AgeGroup.TEENAGERS],
             languages: ['en'],
             schedule: {
@@ -128,19 +128,19 @@ async function main() {
                     time: '7:00 PM - 8:30 PM'
                 }
             },
-            contactName: 'Sarah Johnson',
-            contactPhone: '(310) 555-0123',
-            contactEmail: 'youth@parish.org',
+            contactName: 'FAKE - Sarah Test',
+            contactPhone: '(555) FAKE-123',
+            contactEmail: 'PLACEHOLDER@example.com',
             requiresRegistration: true,
             isAccessible: true,
-            requirements: ['Parent permission slip required'],
+            requirements: ['[PLACEHOLDER] Parent permission slip required'],
             materials: ['Bible', 'Notebook'],
             cost: 'Free'
         },
         {
-            name: 'Bible Study Group',
+            name: '[PLACEHOLDER] Bible Study Group',
             type: MinistryType.BIBLE_STUDY,
-            description: 'Weekly Bible study focusing on Sunday readings and Catholic teachings. Open to all adults seeking to deepen their faith.',
+            description: '[FAKE DATA] Generic bible study description for testing purposes only.',
             ageGroups: [AgeGroup.ADULTS, AgeGroup.SENIORS],
             languages: ['en'],
             schedule: {
@@ -149,8 +149,8 @@ async function main() {
                     time: '10:00 AM - 11:30 AM'
                 }
             },
-            contactName: 'Michael Rodriguez',
-            contactEmail: 'biblestudy@parish.org',
+            contactName: 'FAKE - Michael Test',
+            contactEmail: 'PLACEHOLDER@example.com',
             requiresRegistration: false,
             isAccessible: true,
             requirements: [],
@@ -158,9 +158,9 @@ async function main() {
             cost: '$10 for study materials'
         },
         {
-            name: 'Food Pantry',
+            name: '[PLACEHOLDER] Food Pantry',
             type: MinistryType.FOOD_PANTRY,
-            description: 'Providing food assistance to families in need. Volunteers help with sorting, packing, and distribution.',
+            description: '[FAKE DATA] Generic food pantry description for testing purposes only.',
             ageGroups: [AgeGroup.ALL_AGES],
             languages: ['en', 'es'],
             schedule: {
@@ -169,19 +169,19 @@ async function main() {
                     time: '9:00 AM - 12:00 PM'
                 }
             },
-            contactName: 'Maria Santos',
-            contactPhone: '(213) 555-0456',
-            contactEmail: 'foodpantry@parish.org',
+            contactName: 'FAKE - Maria Test',
+            contactPhone: '(555) FAKE-456',
+            contactEmail: 'PLACEHOLDER@example.com',
             requiresRegistration: false,
             isAccessible: true,
-            requirements: ['Background check for regular volunteers'],
+            requirements: ['[PLACEHOLDER] Background check for regular volunteers'],
             materials: [],
             cost: 'Free'
         },
         {
-            name: 'Senior Ministry',
+            name: '[PLACEHOLDER] Senior Ministry',
             type: MinistryType.SENIORS_MINISTRY,
-            description: 'Monthly gatherings for seniors including lunch, fellowship, guest speakers, and occasional day trips.',
+            description: '[FAKE DATA] Generic senior ministry description for testing purposes only.',
             ageGroups: [AgeGroup.SENIORS],
             languages: ['en'],
             schedule: {
@@ -190,20 +190,20 @@ async function main() {
                     time: '11:30 AM - 2:00 PM'
                 }
             },
-            contactName: 'Dorothy Chen',
-            contactPhone: '(626) 555-0789',
-            contactEmail: 'seniors@parish.org',
+            contactName: 'FAKE - Dorothy Test',
+            contactPhone: '(555) FAKE-789',
+            contactEmail: 'PLACEHOLDER@example.com',
             requiresRegistration: true,
             maxParticipants: 50,
             isAccessible: true,
-            requirements: ['Age 60+'],
+            requirements: ['[PLACEHOLDER] Age 60+'],
             materials: [],
             cost: '$5 for lunch'
         },
         {
-            name: 'RCIA (Rite of Christian Initiation of Adults)',
+            name: '[PLACEHOLDER] RCIA',
             type: MinistryType.RCIA,
-            description: 'Preparation program for adults seeking to join the Catholic Church or complete their initiation sacraments.',
+            description: '[FAKE DATA] Generic RCIA description for testing purposes only.',
             ageGroups: [AgeGroup.ADULTS],
             languages: ['en', 'es'],
             schedule: {
@@ -213,19 +213,19 @@ async function main() {
                 },
                 season: 'September through Easter Vigil'
             },
-            contactName: 'Father Martinez',
-            contactPhone: '(213) 555-0321',
-            contactEmail: 'rcia@parish.org',
+            contactName: 'FAKE - Father Test',
+            contactPhone: '(555) FAKE-321',
+            contactEmail: 'PLACEHOLDER@example.com',
             requiresRegistration: true,
             isAccessible: true,
-            requirements: ['Interview with parish staff'],
+            requirements: ['[PLACEHOLDER] Interview with parish staff'],
             materials: ['Catholic Catechism', 'Bible'],
             cost: '$50 for materials'
         },
         {
-            name: 'Knights of Columbus',
+            name: '[PLACEHOLDER] Knights of Columbus',
             type: MinistryType.KNIGHTS_OF_COLUMBUS,
-            description: 'Catholic fraternal organization dedicated to charity, unity, fraternity, and patriotism. Monthly meetings and service projects.',
+            description: '[FAKE DATA] Generic Knights of Columbus description for testing purposes only.',
             ageGroups: [AgeGroup.ADULTS],
             languages: ['en'],
             schedule: {
@@ -234,20 +234,255 @@ async function main() {
                     time: '7:30 PM - 9:00 PM'
                 }
             },
-            contactName: 'Robert Kim',
-            contactPhone: '(310) 555-0654',
-            contactEmail: 'knights@parish.org',
+            contactName: 'FAKE - Robert Test',
+            contactPhone: '(555) FAKE-654',
+            contactEmail: 'PLACEHOLDER@example.com',
             requiresRegistration: true,
             isAccessible: true,
-            requirements: ['Catholic men 18+'],
+            requirements: ['[PLACEHOLDER] Catholic men 18+'],
             materials: [],
             cost: 'Membership dues apply'
         }
     ];
 
-    // Create ministries for each parish
+    // REAL ministry data from actual LA parishes (verified sources)
+    const realMinistries = [
+        // Cathedral of Our Lady of the Angels - REAL DATA
+        {
+            name: 'Cathedral Music Ministry - Spanish Chorus',
+            type: MinistryType.CHOIR_MUSIC,
+            description: 'The Spanish Chorus at the Cathedral of Our Lady of the Angels, directed by Jose Delgadillo. Open to singers who want to serve at Spanish-language masses.',
+            ageGroups: [AgeGroup.ADULTS, AgeGroup.YOUNG_ADULTS],
+            languages: ['es'],
+            schedule: {
+                weekly: {
+                    day: 'Rehearsals by arrangement',
+                    time: 'Times vary'
+                }
+            },
+            contactName: 'Jose Delgadillo',
+            contactEmail: 'coro@olacathedral.org',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Must be able to commit to regular rehearsals', 'Basic Spanish singing ability'],
+            materials: ['Music provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'olacathedral.org/music'
+        },
+        {
+            name: 'Cathedral Volunteer Program - Hospitality Ministry',
+            type: MinistryType.HOSPITALITY,
+            description: 'The Cathedral of Our Lady of the Angels welcomes volunteers for hospitality ministry. Designated ministers welcome strangers and awaken the oneness in Christ within the community.',
+            ageGroups: [AgeGroup.ALL_AGES],
+            languages: ['en', 'es'],
+            schedule: {
+                flexible: 'Various opportunities available for weekend masses'
+            },
+            contactName: 'Cari Hilger',
+            contactPhone: '(213) 680-5215',
+            contactEmail: 'volunteers@olacathedral.org',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['General orientation required', 'Age-appropriate standards apply'],
+            materials: ['Training provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'olacathedral.org/volunteer'
+        },
+        {
+            name: 'Cathedral Altar Server Ministry',
+            type: MinistryType.LITURGICAL_MINISTRY,
+            description: 'Altar server ministry at the Cathedral of Our Lady of the Angels. Servers assist the priest during Mass and other liturgical celebrations.',
+            ageGroups: [AgeGroup.CHILDREN, AgeGroup.TEENAGERS, AgeGroup.ADULTS],
+            languages: ['en', 'es'],
+            schedule: {
+                flexible: 'Various mass times available'
+            },
+            contactName: 'Cari Hilger',
+            contactPhone: '(213) 680-5215',
+            contactEmail: 'volunteers@olacathedral.org',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Training required', 'Regular commitment expected'],
+            materials: ['Alb and other vestments provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'olacathedral.org/volunteer'
+        },
+        {
+            name: 'Cathedral Lector Ministry',
+            type: MinistryType.LITURGICAL_MINISTRY,
+            description: 'Lector ministry at the Cathedral of Our Lady of the Angels. Lectors proclaim the Word of God during liturgical celebrations.',
+            ageGroups: [AgeGroup.ADULTS],
+            languages: ['en', 'es'],
+            schedule: {
+                flexible: 'Various mass times available'
+            },
+            contactName: 'Cari Hilger',
+            contactPhone: '(213) 680-5215',
+            contactEmail: 'volunteers@olacathedral.org',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Training required', 'Good public speaking ability'],
+            materials: ['Lectionary provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'olacathedral.org/volunteer'
+        },
+        // St. Monica Catholic Community - REAL DATA
+        {
+            name: 'St. Monica Youth Ministry',
+            type: MinistryType.YOUTH_MINISTRY,
+            description: 'Youth ministry program at St. Monica Catholic Community in Santa Monica, providing faith formation and community for teenagers.',
+            ageGroups: [AgeGroup.TEENAGERS],
+            languages: ['en'],
+            schedule: {
+                weekly: {
+                    day: 'Contact for current schedule',
+                    time: 'Evenings'
+                }
+            },
+            contactPhone: '(310) 566-1500',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Parent/guardian permission for minors'],
+            materials: ['Materials provided'],
+            cost: 'Contact for details',
+            verified: true,
+            source: 'stmonica.net/ministries/faithformation/youthmin'
+        },
+        {
+            name: 'St. Monica JustFaith Ministry',
+            type: MinistryType.SOCIAL_JUSTICE,
+            description: 'JustFaith ministry at St. Monica Catholic Community, focusing on social justice education and action rooted in Catholic social teaching.',
+            ageGroups: [AgeGroup.ADULTS, AgeGroup.YOUNG_ADULTS],
+            languages: ['en'],
+            schedule: {
+                program: 'Contact for current program schedule'
+            },
+            contactPhone: '(310) 566-1500',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Commitment to full program participation'],
+            materials: ['Study materials provided'],
+            cost: 'Contact for program fees',
+            verified: true,
+            source: 'stmonica.net/ministries/faithformation/just-faith'
+        },
+        {
+            name: 'St. Monica GLO: LGBTQ+ Outreach Ministry',
+            type: MinistryType.MISSION_OUTREACH,
+            description: 'GLO (LGBTQ+ Outreach Ministry) at St. Monica Catholic Community provides a welcoming space for LGBTQ+ individuals and their families within the Catholic faith community.',
+            ageGroups: [AgeGroup.ALL_AGES],
+            languages: ['en'],
+            schedule: {
+                monthly: 'Regular gatherings - contact for schedule'
+            },
+            contactPhone: '(310) 566-1500',
+            requiresRegistration: false,
+            isAccessible: true,
+            requirements: [],
+            materials: [],
+            cost: 'Free',
+            verified: true,
+            source: 'stmonica.net/ministries/fellowship-groups/glo'
+        },
+        {
+            name: 'St. Monica Hope at the Door',
+            type: MinistryType.MISSION_OUTREACH,
+            description: 'Hope at the Door ministry at St. Monica Catholic Community provides direct outreach and assistance to homeless individuals and families in the Santa Monica area.',
+            ageGroups: [AgeGroup.ADULTS, AgeGroup.YOUNG_ADULTS],
+            languages: ['en', 'es'],
+            schedule: {
+                weekly: 'Regular outreach schedule - contact for details'
+            },
+            contactPhone: '(310) 566-1500',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Background check may be required', 'Training session attendance'],
+            materials: ['Supplies provided'],
+            cost: 'Free to volunteer',
+            verified: true,
+            source: 'stmonica.net/ministries/pastoral-care/hope-at-the-door'
+        },
+        {
+            name: 'St. Monica Stephen Ministry',
+            type: MinistryType.PASTORAL_CARE,
+            description: 'Stephen Ministry at St. Monica Catholic Community provides one-on-one Christian care and support to individuals going through difficult times in their lives.',
+            ageGroups: [AgeGroup.ADULTS],
+            languages: ['en'],
+            schedule: {
+                training: 'Initial training required, then flexible scheduling'
+            },
+            contactPhone: '(310) 566-1500',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Training program completion', 'Commitment to confidentiality', 'Regular supervision meetings'],
+            materials: ['Training materials provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'stmonica.net/ministries/pastoral-care/stephen-ministry-peer-support'
+        },
+        {
+            name: 'St. Monica Green Team',
+            type: MinistryType.COMMUNITY_SERVICE,
+            description: 'Environmental ministry at St. Monica Catholic Community focused on caring for creation through beach cleanups, sustainability education, and environmental stewardship projects.',
+            ageGroups: [AgeGroup.ALL_AGES],
+            languages: ['en'],
+            schedule: {
+                monthly: 'Regular beach cleanups and environmental projects'
+            },
+            contactPhone: '(310) 566-1500',
+            requiresRegistration: false,
+            isAccessible: true,
+            requirements: [],
+            materials: ['Cleanup supplies provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'stmonica.net/serve/locally/greenteam'
+        },
+        {
+            name: 'St. Monica Cornerstone Retreats',
+            type: MinistryType.RETREAT_MINISTRY,
+            description: 'Cornerstone retreats at St. Monica Catholic Community offer spiritual renewal and community building experiences for adults.',
+            ageGroups: [AgeGroup.ADULTS],
+            languages: ['en'],
+            schedule: {
+                periodic: 'Several times per year - check parish calendar'
+            },
+            contactPhone: '(310) 566-1500',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Registration deadline applies'],
+            materials: ['All materials provided'],
+            cost: 'Contact for retreat fees',
+            verified: true,
+            source: 'stmonica.net/ministries/faithformation/cornerstone-retreats'
+        },
+        {
+            name: 'St. Monica Scripture Encounter',
+            type: MinistryType.BIBLE_STUDY,
+            description: 'Scripture Encounter at St. Monica Catholic Community provides in-depth study of the Bible in a supportive group setting.',
+            ageGroups: [AgeGroup.ADULTS],
+            languages: ['en'],
+            schedule: {
+                weekly: 'Contact for current schedule and format'
+            },
+            contactPhone: '(310) 566-1500',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: [],
+            materials: ['Study guides provided'],
+            cost: 'Contact for material fees',
+            verified: true,
+            source: 'stmonica.net/ministries/faithformation/2020sscruptureencounter'
+        }
+    ];
+
+    // Create PLACEHOLDER ministries for each parish (FAKE DATA)
     for (const parish of createdParishes) {
-        for (const template of ministryTemplates) {
+        for (const template of ministryPlaceholders) {
             await prisma.ministry.create({
                 data: {
                     ...template,
@@ -257,7 +492,57 @@ async function main() {
         }
     }
 
-    console.log('✅ Created ministries for all parishes');
+    console.log('✅ Created placeholder ministries for all parishes');
+
+    // Create REAL ministries for specific parishes
+    // Cathedral ministries (Cathedral of Our Lady of the Angels)
+    const cathedral = createdParishes.find((p: any) => p.name === 'Cathedral of Our Lady of the Angels');
+    if (cathedral) {
+        const cathedralMinistries = realMinistries.filter(m =>
+            m.name.includes('Cathedral') || m.contactEmail === 'coro@olacathedral.org' || m.contactEmail === 'volunteers@olacathedral.org'
+        );
+
+        for (const ministry of cathedralMinistries) {
+            const { verified, source, ...ministryData } = ministry;
+
+            await prisma.ministry.create({
+                data: {
+                    ...ministryData,
+                    parishId: cathedral.id,
+                },
+            });
+        }
+        console.log(`✅ Created ${cathedralMinistries.length} real ministries for Cathedral of Our Lady of the Angels`);
+    }
+
+    // St. Monica ministries
+    const stMonica = createdParishes.find((p: any) => p.name === 'St. Monica Catholic Church');
+    if (stMonica) {
+        const stMonicaMinistries = realMinistries.filter(m =>
+            m.name.includes('St. Monica') || m.contactPhone === '(310) 566-1500'
+        );
+
+        for (const ministry of stMonicaMinistries) {
+            const { verified, source, ...ministryData } = ministry;
+            await prisma.ministry.create({
+                data: {
+                    ...ministryData,
+                    parishId: stMonica.id,
+                },
+            });
+        }
+        console.log(`✅ Created ${stMonicaMinistries.length} real ministries for St. Monica Catholic Church`);
+    }
+
+    console.log('✅ Created all real ministries from verified sources');
+    console.log('📋 Real ministry data sources:');
+    console.log('   - Cathedral of Our Lady of the Angels: olacathedral.org');
+    console.log('   - St. Monica Catholic Community: stmonica.net');
+    console.log('');
+    console.log('🔍 For verification purposes, real ministries include:');
+    realMinistries.forEach(ministry => {
+        console.log(`   - ${ministry.name} (Source: ${ministry.source})`);
+    });
 
     // Create admin user
     await prisma.user.upsert({
