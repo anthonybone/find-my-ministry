@@ -186,8 +186,7 @@ export const MapView: React.FC = () => {
     });
 
     const handleMarkerClick = (ministry: Ministry) => {
-        setSelectedMinistry(ministry);
-        // Zoom to marker when clicked
+        // Just zoom to marker when clicked, don't show details automatically
         if (mapRef.current) {
             mapRef.current.setView([ministry.parish.latitude, ministry.parish.longitude], 14, {
                 animate: true,
@@ -279,37 +278,43 @@ export const MapView: React.FC = () => {
                                 click: () => handleMarkerClick(ministry),
                             }}
                         >
-                            <Popup maxWidth={320} className="ministry-popup">
-                                <div className="p-3">
-                                    <div className="flex items-start justify-between mb-2">
-                                        <h3 className="font-semibold text-base text-gray-900 flex-1 pr-2">
+                            <Popup maxWidth={360} className="ministry-popup">
+                                <div className="p-4">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <h3 className="font-bold text-lg text-gray-900 flex-1 pr-2">
                                             {ministry.name}
                                         </h3>
-                                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full whitespace-nowrap">
+                                        <span className="text-xs px-2 py-1 bg-primary-100 text-primary-700 rounded-full whitespace-nowrap font-medium">
                                             {getMinistryTypeDisplay(ministry.type)}
                                         </span>
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                         <div className="flex items-center text-sm text-gray-600">
-                                            <span className="font-medium">📍 {ministry.parish.name}</span>
+                                            <span className="font-semibold">📍 {ministry.parish.name}</span>
                                         </div>
-                                        <div className="text-sm text-gray-600">
+                                        <div className="text-sm text-gray-600 font-medium">
                                             {ministry.parish.address}, {ministry.parish.city}
                                         </div>
                                         {ministry.description && (
-                                            <p className="text-sm text-gray-700 line-clamp-3">{ministry.description}</p>
+                                            <p className="text-sm text-gray-700 line-clamp-2 bg-gray-50 p-2 rounded border-l-3 border-primary-300">
+                                                {ministry.description}
+                                            </p>
                                         )}
-                                        <div className="flex items-center justify-between pt-2">
-                                            <div className="text-xs text-gray-500">
-                                                {ministry.ageGroups.join(', ')}
+                                        <div className="flex items-center justify-between pt-2 border-t">
+                                            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                                Ages: {ministry.ageGroups.join(', ')}
                                             </div>
-                                            <button
-                                                onClick={() => setSelectedMinistry(ministry)}
-                                                className="text-sm bg-primary-600 text-white px-3 py-1.5 rounded-md hover:bg-primary-700 transition-colors font-medium"
-                                            >
-                                                View Details
-                                            </button>
                                         </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedMinistry(ministry);
+                                            }}
+                                            className="w-full text-sm bg-primary-600 text-white px-4 py-2.5 rounded-lg hover:bg-primary-700 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2"
+                                        >
+                                            <span>📋</span>
+                                            View Full Details
+                                        </button>
                                     </div>
                                 </div>
                             </Popup>
@@ -318,24 +323,42 @@ export const MapView: React.FC = () => {
                 })}
             </MapContainer>
 
-            {/* Ministry Details Panel */}
+            {/* Ministry Details Modal */}
             {selectedMinistry && (
-                <div className="absolute top-4 right-4 w-96 max-h-[80vh] overflow-y-auto bg-white rounded-lg shadow-lg z-[1000]">
-                    <div className="p-4 border-b border-gray-200">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-lg font-semibold">Ministry Details</h2>
-                            <button
-                                onClick={() => setSelectedMinistry(null)}
-                                className="text-gray-400 hover:text-gray-600 text-xl"
-                            >
-                                ×
-                            </button>
+                <>
+                    {/* Modal Backdrop */}
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-50 z-[1500]"
+                        onClick={() => setSelectedMinistry(null)}
+                    />
+
+                    {/* Modal Content */}
+                    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg max-h-[80vh] overflow-y-auto bg-white rounded-xl shadow-2xl z-[1600] mx-4">
+                        <div className="sticky top-0 bg-white p-4 border-b border-gray-200 rounded-t-xl">
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-lg">📋</span>
+                                    <h2 className="text-xl font-bold text-gray-900">Ministry Details</h2>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedMinistry(null)}
+                                    className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors"
+                                    title="Close details"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div className="mt-2 text-sm text-gray-500">
+                                Complete information for this ministry
+                            </div>
+                        </div>
+                        <div className="p-4">
+                            <MinistryCard ministry={selectedMinistry} />
                         </div>
                     </div>
-                    <div className="p-4">
-                        <MinistryCard ministry={selectedMinistry} />
-                    </div>
-                </div>
+                </>
             )}
 
             {/* Custom Map Controls */}
@@ -352,10 +375,10 @@ export const MapView: React.FC = () => {
                     <span className="font-medium text-green-600">{ministriesData?.ministries?.length || 0}</span> ministries found
                 </p>
                 <div className="text-xs text-gray-500 space-y-1">
-                    <div>📍 Click markers for details</div>
-                    <div>🖱️ Drag to pan around</div>
+                    <div>📍 Click markers for preview</div>
+                    <div>� Click "View Details" for full info</div>
+                    <div>�️ Drag to pan around</div>
                     <div>🔍 Scroll wheel to zoom</div>
-                    <div>⌨️ Use +/- keys to zoom</div>
                 </div>
             </div>
         </div>
