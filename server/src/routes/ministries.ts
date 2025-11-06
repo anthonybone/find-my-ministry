@@ -15,6 +15,7 @@ router.get('/', async (req, res) => {
             isActive = 'true',
             isPublic = 'true',
             search,
+            includePlaceholders = 'false',
             limit = '50',
             offset = '0'
         } = req.query;
@@ -54,7 +55,16 @@ router.get('/', async (req, res) => {
             ];
         }
 
-        const ministries = await prisma.ministry.findMany({
+        // Filter out placeholder ministries by default (unless dev toggle is enabled)
+        if (includePlaceholders !== 'true') {
+            where.AND = [
+                { name: { not: { contains: '[PLACEHOLDER]' } } },
+                { name: { not: { contains: 'FAKE' } } },
+                { contactEmail: { not: { contains: 'PLACEHOLDER@example.com' } } }
+            ];
+        }
+
+        let ministries = await prisma.ministry.findMany({
             where,
             include: {
                 parish: {
@@ -79,9 +89,20 @@ router.get('/', async (req, res) => {
                     }
                 }
             },
-            orderBy: { name: 'asc' },
             take: parseInt(limit as string),
             skip: parseInt(offset as string)
+        });
+
+        // Sort to prioritize real ministries (non-placeholder) first
+        ministries = ministries.sort((a: any, b: any) => {
+            const aIsPlaceholder = a.name.includes('[PLACEHOLDER]') || a.name.includes('FAKE') || a.contactEmail?.includes('PLACEHOLDER@example.com');
+            const bIsPlaceholder = b.name.includes('[PLACEHOLDER]') || b.name.includes('FAKE') || b.contactEmail?.includes('PLACEHOLDER@example.com');
+
+            if (aIsPlaceholder && !bIsPlaceholder) return 1;
+            if (!aIsPlaceholder && bIsPlaceholder) return -1;
+
+            // Both are same type (real or placeholder), sort alphabetically by name
+            return a.name.localeCompare(b.name);
         });
 
         const total = await prisma.ministry.count({ where });

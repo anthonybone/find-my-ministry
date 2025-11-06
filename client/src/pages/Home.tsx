@@ -16,10 +16,13 @@ export const Home: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
 
-    // Fetch recent ministries for homepage
+    // Fetch recent ministries for homepage (exclude placeholders by default)
     const { data: ministriesData } = useQuery(
         'recent-ministries',
-        () => ministryApi.getAll({ limit: 6 }),
+        () => ministryApi.getAll({
+            limit: 6,
+            includePlaceholders: false
+        }),
         { refetchOnWindowFocus: false }
     );
 

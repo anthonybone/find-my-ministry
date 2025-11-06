@@ -22,7 +22,10 @@ export const MapView: React.FC = () => {
 
     const { data: ministriesData, isLoading } = useQuery(
         'map-ministries',
-        () => ministryApi.getAll({ limit: 100 }),
+        () => ministryApi.getAll({
+            limit: 100,
+            includePlaceholders: process.env.NODE_ENV === 'development' && localStorage.getItem('showPlaceholders') === 'true'
+        }),
         { refetchOnWindowFocus: false }
     );
 

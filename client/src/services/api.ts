@@ -117,6 +117,7 @@ export interface SearchFilters {
     location?: string;
     ageGroups?: string[];
     languages?: string[];
+    includePlaceholders?: boolean;
     limit?: number;
     offset?: number;
 }
@@ -140,6 +141,7 @@ export const ministryApi = {
         if (filters?.location) params.append('location', filters.location);
         if (filters?.ageGroups) params.append('ageGroups', filters.ageGroups.join(','));
         if (filters?.languages) params.append('languages', filters.languages.join(','));
+        if (filters?.includePlaceholders) params.append('includePlaceholders', filters.includePlaceholders.toString());
         if (filters?.limit) params.append('limit', filters.limit.toString());
         if (filters?.offset) params.append('offset', filters.offset.toString());
 

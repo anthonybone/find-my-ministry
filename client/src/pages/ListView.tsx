@@ -17,14 +17,40 @@ import {
         languages: []
     });
     const [showFilters, setShowFilters] = useState(false);
+    const [showPlaceholders, setShowPlaceholders] = useState(false);
+    const [isDevMode, setIsDevMode] = useState(() =>
+        process.env.NODE_ENV === 'development' ||
+        window.location.hostname === 'localhost' ||
+        localStorage.getItem('devMode') === 'true' ||
+        new URLSearchParams(window.location.search).get('dev') === 'true'
+    );
 
-    const { data: ministriesData, isLoading } = useQuery(
-        ['ministries', searchQuery, filters],
+    // Keyboard shortcut to toggle dev mode (Ctrl+Shift+D)
+    React.useEffect(() => {
+        const handleKeyPress = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                e.preventDefault();
+                const newDevMode = !localStorage.getItem('devMode') || localStorage.getItem('devMode') !== 'true';
+                if (newDevMode) {
+                    localStorage.setItem('devMode', 'true');
+                } else {
+                    localStorage.removeItem('devMode');
+                }
+                setIsDevMode(newDevMode || process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost');
+                console.log('🔧 Dev Mode:', newDevMode ? 'ENABLED' : 'DISABLED');
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, []); const { data: ministriesData, isLoading } = useQuery(
+        ['ministries', searchQuery, filters, showPlaceholders],
         () => ministryApi.getAll({
             query: searchQuery || undefined,
             type: filters.type || undefined,
             ageGroups: filters.ageGroups.length > 0 ? filters.ageGroups : undefined,
             languages: filters.languages.length > 0 ? filters.languages : undefined,
+            includePlaceholders: showPlaceholders,
             limit: 50
         }),
         { refetchOnWindowFocus: false }
@@ -72,19 +98,60 @@ import {
                             </div>
                         </form>
 
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="inline-flex items-center px-4 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                        >
-                            <FunnelIcon className="h-5 w-5 mr-2" />
-                            Filters
-                        </button>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className="inline-flex items-center px-4 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                            >
+                                <FunnelIcon className="h-5 w-5 mr-2" />
+                                Filters
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setFilters({ type: '', ageGroups: [], languages: [] });
+                                    setShowPlaceholders(false);
+                                }}
+                                className="inline-flex items-center px-4 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                            >
+                                Reset Filters
+                            </button>
+                        </div>
                     </div>
 
                     {/* Filter Panel */}
                     {showFilters && (
                         <div className="mt-4 p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">Filter Ministries</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-medium text-gray-900">Filter Ministries</h3>
+                                {isDevMode && (
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-sm text-gray-600">Show Test Data:</span>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only"
+                                                checked={showPlaceholders}
+                                                onChange={(e) => setShowPlaceholders(e.target.checked)}
+                                            />
+                                            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus-within:ring-2 focus-within:ring-offset-2 ${showPlaceholders
+                                                    ? 'bg-green-500 focus-within:ring-green-500'
+                                                    : 'bg-gray-300 focus-within:ring-gray-300'
+                                                }`}>
+                                                <span
+                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${showPlaceholders ? 'translate-x-6' : 'translate-x-1'
+                                                        }`}
+                                                />
+                                            </div>
+                                        </label>
+                                        <span className="text-xs text-orange-600 font-medium">DEV MODE</span>
+                                        <span className="text-xs text-gray-500 ml-2" title="Press Ctrl+Shift+D to toggle dev mode">
+                                            (Ctrl+Shift+D)
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -138,9 +205,23 @@ import {
 
                 {/* Results */}
                 <div className="mb-6">
-                    <p className="text-gray-600">
-                        {ministriesData?.ministries?.length || 0} ministries found
-                    </p>
+                    <div className="flex items-center justify-between">
+                        <p className="text-gray-600">
+                            {ministriesData?.ministries?.length || 0} ministries found
+                        </p>
+                        <div className="flex items-center gap-4">
+                            {!showPlaceholders && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    ✓ Real ministries only
+                                </span>
+                            )}
+                            {showPlaceholders && isDevMode && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                    ⚠️ Including test data
+                                </span>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Ministry Grid */}
@@ -161,6 +242,7 @@ import {
                             onClick={() => {
                                 setSearchQuery('');
                                 setFilters({ type: '', ageGroups: [], languages: [] });
+                                setShowPlaceholders(false);
                             }}
                             className="text-primary-600 hover:text-primary-700 font-medium"
                         >
