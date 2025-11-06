@@ -25,15 +25,56 @@ router.get('/', async (req, res) => {
             totalResults: 0
         };
 
+        // Enhanced search with fuzzy matching
+        const searchTerms = query.toLowerCase().split(/\s+/).filter(term => term.length > 0);
+
+        // Create more flexible search conditions
+        const createFlexibleSearch = (field: string) => {
+            const orConditions = [];
+
+            // Exact phrase match (highest priority)
+            orConditions.push({
+                [field]: { contains: query, mode: 'insensitive' }
+            });
+
+            // Individual word matches
+            searchTerms.forEach(term => {
+                orConditions.push({
+                    [field]: { contains: term, mode: 'insensitive' }
+                });
+            });
+
+            // Abbreviation handling for common Catholic terms
+            const abbreviations: { [key: string]: string[] } = {
+                'ola': ['our lady of the angels', 'our lady'],
+                'our lady': ['our lady of the angels', 'cathedral of our lady'],
+                'st': ['saint'],
+                'holy': ['holy family', 'holy spirit', 'holy cross']
+            };
+
+            searchTerms.forEach(term => {
+                if (abbreviations[term]) {
+                    abbreviations[term].forEach(expansion => {
+                        orConditions.push({
+                            [field]: { contains: expansion, mode: 'insensitive' }
+                        });
+                    });
+                }
+            });
+
+            return orConditions;
+        };
+
         // Search ministries
         const ministryWhere: any = {
             isActive: true,
             isPublic: true,
             OR: [
-                { name: { contains: query, mode: 'insensitive' } },
-                { description: { contains: query, mode: 'insensitive' } },
-                { parish: { name: { contains: query, mode: 'insensitive' } } },
-                { parish: { city: { contains: query, mode: 'insensitive' } } }
+                ...createFlexibleSearch('name'),
+                ...createFlexibleSearch('description').map(cond => ({ description: cond.description })),
+                ...createFlexibleSearch('name').map(cond => ({ parish: cond })),
+                ...createFlexibleSearch('city').map(cond => ({ parish: cond })),
+                ...createFlexibleSearch('address').map(cond => ({ parish: cond }))
             ]
         };
 
@@ -91,12 +132,12 @@ router.get('/', async (req, res) => {
             orderBy: { name: 'asc' }
         });
 
-        // Search parishes
+        // Search parishes with enhanced matching
         const parishWhere: any = {
             OR: [
-                { name: { contains: query, mode: 'insensitive' } },
-                { address: { contains: query, mode: 'insensitive' } },
-                { city: { contains: query, mode: 'insensitive' } }
+                ...createFlexibleSearch('name'),
+                ...createFlexibleSearch('address').map(cond => ({ address: cond.address })),
+                ...createFlexibleSearch('city').map(cond => ({ city: cond.city }))
             ]
         };
 
@@ -152,15 +193,32 @@ router.get('/suggestions', async (req, res) => {
             return res.json({ suggestions: [] });
         }
 
+        // Enhanced suggestions with fuzzy matching
+        const queryLower = query.toLowerCase();
+
+        // Special handling for common abbreviations
+        const expandQuery = (q: string): string[] => {
+            const expansions = [q];
+            if (q === 'ola') {
+                expansions.push('our lady of the angels', 'cathedral our lady');
+            } else if (q.includes('our lady')) {
+                expansions.push('cathedral our lady angels', 'our lady angels');
+            } else if (q === 'st') {
+                expansions.push('saint');
+            }
+            return expansions;
+        };
+
+        const queryExpansions = expandQuery(queryLower);
+
         // Get ministry name suggestions
         const ministryNames = await prisma.ministry.findMany({
             where: {
                 isActive: true,
                 isPublic: true,
-                name: {
-                    contains: query,
-                    mode: 'insensitive'
-                }
+                OR: queryExpansions.map(exp => ({
+                    name: { contains: exp, mode: 'insensitive' }
+                }))
             },
             select: {
                 name: true
@@ -172,10 +230,9 @@ router.get('/suggestions', async (req, res) => {
         // Get parish name suggestions
         const parishNames = await prisma.parish.findMany({
             where: {
-                name: {
-                    contains: query,
-                    mode: 'insensitive'
-                }
+                OR: queryExpansions.map(exp => ({
+                    name: { contains: exp, mode: 'insensitive' }
+                }))
             },
             select: {
                 name: true
