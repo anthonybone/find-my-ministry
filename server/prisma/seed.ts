@@ -92,8 +92,145 @@ async function main() {
         }
     ];
 
+    // Additional Los Angeles parishes
+    const newParishes = [
+        {
+            name: 'Our Lady of Loretto',
+            address: '250 N Union Ave',
+            city: 'Los Angeles',
+            state: 'CA',
+            zipCode: '90026',
+            latitude: 34.0779,
+            longitude: -118.2481,
+            phone: '(213) 483-3013',
+            email: 'lorettola@aol.com',
+            website: 'https://lorettola.org',
+            pastor: 'Rev. Jesus Nieto-Ruiz',
+            massSchedule: {
+                weekday: ['MON, WED, FRI, SAT: 8:00 AM English', 'TUE, THU: 8:00 AM Spanish', 'First Friday: 7:00 PM Spanish'],
+                saturday: ['8:00 AM English', '5:30 PM Spanish (Vigil)'],
+                sunday: ['8:00 AM English', '9:45 AM Spanish', '11:30 AM English', '1:00 PM Spanish', '3:00 PM Vietnamese']
+            }
+        },
+        {
+            name: 'St. Kevin Catholic Church',
+            address: '1600 Hillhurst Ave',
+            city: 'Los Angeles',
+            state: 'CA',
+            zipCode: '90027',
+            latitude: 34.0956,
+            longitude: -118.2882,
+            phone: '(323) 664-6030',
+            pastor: 'Rev. Michael Rocha',
+            massSchedule: {
+                weekday: ['8:00 AM'],
+                saturday: ['8:00 AM', '5:30 PM (Vigil)'],
+                sunday: ['7:30 AM', '9:00 AM', '10:30 AM', '12:15 PM', '6:00 PM']
+            }
+        },
+        {
+            name: 'Precious Blood Catholic Church',
+            address: '435 S Occidental Blvd',
+            city: 'Los Angeles',
+            state: 'CA',
+            zipCode: '90057',
+            latitude: 34.0597,
+            longitude: -118.2819,
+            phone: '(213) 382-2156',
+            pastor: 'Rev. Giovanni Carrasco',
+            massSchedule: {
+                weekday: ['7:30 AM', '6:00 PM'],
+                saturday: ['8:00 AM', '6:00 PM (Vigil)'],
+                sunday: ['7:00 AM', '8:30 AM', '10:00 AM', '11:30 AM', '1:00 PM (Spanish)', '6:00 PM']
+            }
+        },
+        {
+            name: 'Immaculate Heart of Mary Catholic Church',
+            address: '5515 Franklin Ave',
+            city: 'Los Angeles',
+            state: 'CA',
+            zipCode: '90028',
+            latitude: 34.1041,
+            longitude: -118.3085,
+            phone: '(323) 466-3395',
+            pastor: 'Rev. John Molyneux',
+            massSchedule: {
+                weekday: ['8:00 AM'],
+                saturday: ['8:00 AM', '5:00 PM (Vigil)'],
+                sunday: ['8:00 AM', '10:00 AM', '12:00 PM', '6:00 PM']
+            }
+        },
+        {
+            name: 'St. Brendan Catholic Church',
+            address: '310 S Van Ness Ave',
+            city: 'Los Angeles',
+            state: 'CA',
+            zipCode: '90020',
+            latitude: 34.0679,
+            longitude: -118.2986,
+            phone: '(213) 385-1710',
+            pastor: 'Rev. Edward Benioff',
+            massSchedule: {
+                weekday: ['7:30 AM', '6:00 PM'],
+                saturday: ['8:00 AM', '5:30 PM (Vigil)'],
+                sunday: ['7:00 AM', '8:30 AM', '10:30 AM', '12:30 PM', '6:00 PM']
+            }
+        },
+        {
+            name: 'Blessed Sacrament Catholic Church',
+            address: '6657 Sunset Blvd',
+            city: 'Los Angeles',
+            state: 'CA',
+            zipCode: '90028',
+            latitude: 34.0976,
+            longitude: -118.3368,
+            phone: '(323) 462-6483',
+            pastor: 'Rev. Thomas Stehle',
+            massSchedule: {
+                weekday: ['8:00 AM', '6:00 PM'],
+                saturday: ['8:00 AM', '5:30 PM (Vigil)'],
+                sunday: ['7:30 AM', '9:00 AM', '11:00 AM', '12:30 PM', '6:00 PM']
+            }
+        },
+        {
+            name: 'Christ the King Catholic Church',
+            address: '624 N Rossmore Ave',
+            city: 'Los Angeles',
+            state: 'CA',
+            zipCode: '90004',
+            latitude: 34.0783,
+            longitude: -118.3252,
+            phone: '(323) 467-2781',
+            pastor: 'Rev. John Dietzenbach',
+            massSchedule: {
+                weekday: ['8:00 AM'],
+                saturday: ['8:00 AM', '5:00 PM (Vigil)'],
+                sunday: ['8:00 AM', '10:00 AM', '12:00 PM', '6:00 PM']
+            }
+        },
+        {
+            name: 'St. Vincent de Paul Catholic Church',
+            address: '621 W Adams Blvd',
+            city: 'Los Angeles',
+            state: 'CA',
+            zipCode: '90007',
+            latitude: 34.0357,
+            longitude: -118.2774,
+            phone: '(213) 749-8950',
+            pastor: 'Rev. Aidan McAleenan',
+            massSchedule: {
+                weekday: ['7:30 AM', '12:10 PM', '6:00 PM'],
+                saturday: ['8:00 AM', '5:30 PM (Vigil)'],
+                sunday: ['7:30 AM', '9:00 AM', '10:30 AM', '12:00 PM', '1:30 PM (Spanish)', '6:00 PM']
+            }
+        }
+    ];
+
+    // Combine both parish arrays
+    const allParishes = [...parishes, ...newParishes];
+
     const createdParishes = await Promise.all(
-        parishes.map(async (parish) => {
+        allParishes.map(async (parish) => {
             // Check if parish exists first
             const existingParish = await prisma.parish.findFirst({
                 where: { name: parish.name }
@@ -477,6 +614,213 @@ async function main() {
             cost: 'Contact for material fees',
             verified: true,
             source: 'stmonica.net/ministries/faithformation/2020sscruptureencounter'
+        },
+
+        // Our Lady of Loretto - REAL DATA
+        {
+            name: 'Our Lady of Loretto RCIA Program',
+            type: MinistryType.RCIA,
+            description: 'The Rite of Christian Initiation of Adults (RICA in Spanish) at Our Lady of Loretto prepares adults for full membership in the Catholic Church.',
+            ageGroups: [AgeGroup.ADULTS],
+            languages: ['en', 'es'],
+            schedule: {
+                weekly: {
+                    day: 'Contact parish for current schedule',
+                    time: 'Times vary'
+                }
+            },
+            contactPhone: '(213) 483-3013',
+            contactEmail: 'lorettola@aol.com',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Open to unbaptized adults and baptized Christians seeking full communion'],
+            materials: ['Study materials provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'lorettola.org/rcia'
+        },
+        {
+            name: 'Our Lady of Loretto Legion of Mary (English)',
+            type: MinistryType.PRAYER_GROUP,
+            description: 'The Legion of Mary is a lay apostolic association of Catholics who serve the Church on a voluntary basis. English-speaking group at Our Lady of Loretto.',
+            ageGroups: [AgeGroup.ADULTS],
+            languages: ['en'],
+            schedule: {
+                weekly: {
+                    day: 'Contact for meeting schedule',
+                    time: 'Times vary'
+                }
+            },
+            contactPhone: '(213) 483-3013',
+            requiresRegistration: false,
+            isAccessible: true,
+            requirements: ['Commitment to prayer and service'],
+            materials: ['Legion handbook provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'lorettola.org/legion-of-mary'
+        },
+        {
+            name: 'Our Lady of Loretto Legión de María (Español)',
+            type: MinistryType.PRAYER_GROUP,
+            description: 'La Legión de María es una asociación laical apostólica de católicos que sirven a la Iglesia voluntariamente. Grupo en español en Nuestra Señora de Loretto.',
+            ageGroups: [AgeGroup.ADULTS],
+            languages: ['es'],
+            schedule: {
+                weekly: {
+                    day: 'Contactar para horarios',
+                    time: 'Horarios varían'
+                }
+            },
+            contactPhone: '(213) 483-3013',
+            requiresRegistration: false,
+            isAccessible: true,
+            requirements: ['Compromiso a la oración y servicio'],
+            materials: ['Manual de la Legión proporcionado'],
+            cost: 'Gratis',
+            verified: true,
+            source: 'lorettola.org/legion-de-maria'
+        },
+        {
+            name: 'Our Lady of Loretto Knights of Columbus',
+            type: MinistryType.KNIGHTS_OF_COLUMBUS,
+            description: 'The Knights of Columbus at Our Lady of Loretto (Caballeros de Colón) is a Catholic fraternal organization for men focused on charity, unity, fraternity, and patriotism.',
+            ageGroups: [AgeGroup.ADULTS],
+            languages: ['en', 'es'],
+            schedule: {
+                monthly: {
+                    day: 'Contact for meeting schedule',
+                    time: 'Evening meetings'
+                }
+            },
+            contactPhone: '(213) 483-3013',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Catholic men 18 years and older', 'Good standing in the Church'],
+            materials: [],
+            cost: 'Membership dues apply',
+            verified: true,
+            source: 'lorettola.org/knights-of-columbus'
+        },
+        {
+            name: 'Our Lady of Loretto Music Ministry',
+            type: MinistryType.CHOIR_MUSIC,
+            description: 'Music ministry at Our Lady of Loretto enhances liturgical celebrations through song and music at various masses in English, Spanish, and Vietnamese.',
+            ageGroups: [AgeGroup.ALL_AGES],
+            languages: ['en', 'es', 'vi'],
+            schedule: {
+                weekly: {
+                    day: 'Rehearsals and weekend masses',
+                    time: 'Contact for rehearsal times'
+                }
+            },
+            contactPhone: '(213) 483-3013',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Ability to sing and commitment to regular participation'],
+            materials: ['Sheet music provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'lorettola.org/music-ministry'
+        },
+        {
+            name: 'Our Lady of Loretto Altar Servers',
+            type: MinistryType.LITURGICAL_MINISTRY,
+            description: 'Altar servers (Monaguillos) at Our Lady of Loretto assist priests during Mass and other liturgical celebrations.',
+            ageGroups: [AgeGroup.CHILDREN, AgeGroup.TEENAGERS, AgeGroup.ADULTS],
+            languages: ['en', 'es'],
+            schedule: {
+                flexible: 'Various mass times throughout the week'
+            },
+            contactPhone: '(213) 483-3013',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Training required', 'Regular commitment to serve'],
+            materials: ['Alb and serving materials provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'lorettola.org/altar-servers'
+        },
+        {
+            name: 'Our Lady of Loretto Eucharistic Adoration',
+            type: MinistryType.PRAYER_GROUP,
+            description: 'Eucharistic Adoration at Our Lady of Loretto provides time for prayer and contemplation before the Blessed Sacrament.',
+            ageGroups: [AgeGroup.ALL_AGES],
+            languages: ['en', 'es'],
+            schedule: {
+                weekly: {
+                    day: 'Friday',
+                    time: '8:45 AM - 6:45 PM'
+                }
+            },
+            contactPhone: '(213) 483-3013',
+            requiresRegistration: false,
+            isAccessible: true,
+            requirements: [],
+            materials: [],
+            cost: 'Free',
+            verified: true,
+            source: 'lorettola.org/adoration'
+        },
+        {
+            name: 'Our Lady of Loretto Lectors',
+            type: MinistryType.LITURGICAL_MINISTRY,
+            description: 'Lectors (Lectores) at Our Lady of Loretto proclaim the Word of God during Mass in English and Spanish.',
+            ageGroups: [AgeGroup.ADULTS, AgeGroup.YOUNG_ADULTS],
+            languages: ['en', 'es'],
+            schedule: {
+                flexible: 'Various mass times'
+            },
+            contactPhone: '(213) 483-3013',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Training in proper proclamation', 'Good reading skills'],
+            materials: ['Lectionary and workbook provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'lorettola.org/lectors'
+        },
+        {
+            name: 'Our Lady of Loretto Movimiento Familiar Cristiano',
+            type: MinistryType.MARRIAGE_FAMILY,
+            description: 'Christian Family Movement (Movimiento Familiar Cristiano) at Our Lady of Loretto supports married couples and families in their spiritual growth.',
+            ageGroups: [AgeGroup.ADULTS, AgeGroup.FAMILIES],
+            languages: ['es'],
+            schedule: {
+                monthly: {
+                    day: 'Contact for meeting schedule',
+                    time: 'Evening meetings'
+                }
+            },
+            contactPhone: '(213) 483-3013',
+            requiresRegistration: true,
+            isAccessible: true,
+            requirements: ['Married couples welcome'],
+            materials: ['Study materials provided'],
+            cost: 'Free',
+            verified: true,
+            source: 'lorettola.org/movimiento-familia-cristiana'
+        },
+        {
+            name: 'Our Lady of Loretto Vietnamese Community',
+            type: MinistryType.OTHER,
+            description: 'Vietnamese Catholic community ministries at Our Lady of Loretto including Ca Đoàn Emmanuel, Các Bà mẹ công giáo, liên minh thánh tâm, and thiếu nhi thánh thể.',
+            ageGroups: [AgeGroup.ALL_AGES],
+            languages: ['vi'],
+            schedule: {
+                weekly: {
+                    day: 'Sunday and other times',
+                    time: '3:00 PM mass and community activities'
+                }
+            },
+            contactPhone: '(213) 483-3013',
+            requiresRegistration: false,
+            isAccessible: true,
+            requirements: [],
+            materials: [],
+            cost: 'Free',
+            verified: true,
+            source: 'lorettola.org/ministries'
         }
     ];
 
@@ -534,10 +878,30 @@ async function main() {
         console.log(`✅ Created ${stMonicaMinistries.length} real ministries for St. Monica Catholic Church`);
     }
 
+    // Our Lady of Loretto ministries
+    const ourLadyOfLoretto = createdParishes.find((p: any) => p.name === 'Our Lady of Loretto');
+    if (ourLadyOfLoretto) {
+        const lorettoMinistries = realMinistries.filter(m =>
+            m.name.includes('Our Lady of Loretto') || m.contactPhone === '(213) 483-3013'
+        );
+
+        for (const ministry of lorettoMinistries) {
+            const { verified, source, ...ministryData } = ministry;
+            await prisma.ministry.create({
+                data: {
+                    ...ministryData,
+                    parishId: ourLadyOfLoretto.id,
+                },
+            });
+        }
+        console.log(`✅ Created ${lorettoMinistries.length} real ministries for Our Lady of Loretto`);
+    }
+
     console.log('✅ Created all real ministries from verified sources');
     console.log('📋 Real ministry data sources:');
     console.log('   - Cathedral of Our Lady of the Angels: olacathedral.org');
     console.log('   - St. Monica Catholic Community: stmonica.net');
+    console.log('   - Our Lady of Loretto Catholic Church: lorettola.org');
     console.log('');
     console.log('🔍 For verification purposes, real ministries include:');
     realMinistries.forEach(ministry => {
