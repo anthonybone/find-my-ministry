@@ -10,6 +10,7 @@ module.exports = {
         'src/**/*.ts',
         '!src/**/*.d.ts',
         '!src/index.ts', // Exclude main entry point
+        '!src/**/__tests__/**/*.ts', // Exclude test files from coverage
     ],
     coverageDirectory: 'coverage',
     coverageReporters: ['text', 'lcov', 'html'],

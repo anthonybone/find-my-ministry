@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PlayIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
-import { crudTester } from '../utils/testCrudOperations';
+import { crudTester } from '../../__tests__/utils/testCrudOperations';
 
 interface CrudTestPanelProps {
     isVisible: boolean;
@@ -23,7 +23,7 @@ export const CrudTestPanel: React.FC<CrudTestPanelProps> = ({ isVisible, classNa
             addResult('🚀 Starting CRUD test...');
 
             // Get first parish for testing
-            const { parishApi } = await import('../services/api');
+            const { parishApi } = await import('../../services/api');
             const parishResult = await parishApi.getAll({ search: '' });
 
             if (parishResult.parishes.length === 0) {
@@ -100,9 +100,9 @@ export const CrudTestPanel: React.FC<CrudTestPanelProps> = ({ isVisible, classNa
                             <div
                                 key={index}
                                 className={`flex items-start space-x-2 ${result.includes('❌') ? 'text-red-600' :
-                                        result.includes('✅') ? 'text-green-600' :
-                                            result.includes('🟡') ? 'text-yellow-600' :
-                                                'text-slate-600'
+                                    result.includes('✅') ? 'text-green-600' :
+                                        result.includes('🟡') ? 'text-yellow-600' :
+                                            'text-slate-600'
                                     }`}
                             >
                                 <span className="flex-shrink-0">

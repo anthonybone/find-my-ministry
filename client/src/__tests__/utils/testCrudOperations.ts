@@ -3,7 +3,7 @@
  * This file is for development testing purposes only
  */
 
-import { ministryApi, Ministry, AgeGroup } from '../services/api';
+import { ministryApi, Ministry, AgeGroup } from '../../services/api';
 
 // Test data for creating a ministry
 const testMinistryData = {
@@ -76,7 +76,8 @@ export class CrudTester {
             console.log('🟡 Testing UPDATE operation...');
             const updateData = {
                 name: 'Updated Test Ministry - CRUD Demo',
-                description: 'This ministry has been updated to test the UPDATE operation.'
+                description: 'This ministry has been updated to test the UPDATE operation.',
+                type: 'OTHER' as const
             };
 
             const updatedMinistry = await ministryApi.update(ministryId, updateData);
@@ -185,7 +186,7 @@ export const runQuickCrudTest = async (parishId?: string) => {
         // Try to get the first parish ID from the API
         try {
             console.log('🔍 Finding a parish to use for testing...');
-            const { parishApi } = await import('../services/api');
+            const { parishApi } = await import('../../services/api');
             const parishesResult = await parishApi.getAll({ search: '' });
             if (parishesResult.parishes.length > 0) {
                 parishId = parishesResult.parishes[0].id;

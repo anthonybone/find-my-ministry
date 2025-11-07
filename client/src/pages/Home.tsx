@@ -10,7 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { MinistryCard } from '../components/MinistryCard';
 import { AdminMinistryCard } from '../components/AdminMinistryCard';
-import { CrudTestPanel } from '../components/CrudTestPanel';
+import { CrudTestPanel } from '../components/__tests__/CrudTestPanel';
 import { useMinistryData, useParishData } from '../hooks/useMinistryData';
 import { useSearch } from '../hooks/useSearch';
 import { SearchBar } from '../components/common/SearchBar';
