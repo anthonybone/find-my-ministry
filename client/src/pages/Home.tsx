@@ -1,25 +1,88 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
     MapIcon,
     ListBulletIcon,
     BuildingLibraryIcon as ChurchIcon,
     UsersIcon,
-    ClockIcon
+    ClockIcon,
+    CogIcon
 } from '@heroicons/react/24/outline';
 import { MinistryCard } from '../components/MinistryCard';
+import { AdminMinistryCard } from '../components/AdminMinistryCard';
+import { CrudTestPanel } from '../components/CrudTestPanel';
 import { useMinistryData, useParishData } from '../hooks/useMinistryData';
 import { useSearch } from '../hooks/useSearch';
 import { SearchBar } from '../components/common/SearchBar';
+import { ToggleSwitch } from '../components/common/ToggleSwitch';
+import { Ministry } from '../services/api';
+
+// Import CRUD testing utility for development
+import '../utils/testCrudOperations';
 
 export const Home: React.FC = () => {
     const { searchQuery, setSearchQuery, handleSearch } = useSearch();
+    const [isAdminMode, setIsAdminMode] = useState(false);
+    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [localMinistries, setLocalMinistries] = useState<Ministry[]>([]);
 
     // Fetch recent ministries for homepage (exclude placeholders by default)
-    const { data: ministriesData } = useMinistryData({ includePlaceholders: false });
+    const { data: ministriesData, refetch } = useMinistryData({ includePlaceholders: false });
 
     // Fetch parishes count
     const { data: parishesData } = useParishData();
+
+    // Use local ministries state when in admin mode, otherwise use fetched data
+    const displayMinistries = isAdminMode ? localMinistries : ministriesData?.ministries || [];
+
+    // Initialize local ministries when data changes
+    React.useEffect(() => {
+        if (ministriesData?.ministries && !isAdminMode) {
+            setLocalMinistries(ministriesData.ministries);
+        }
+    }, [ministriesData?.ministries, isAdminMode]);
+
+    // Switch to admin mode and initialize local state
+    const handleAdminModeToggle = (enabled: boolean) => {
+        setIsAdminMode(enabled);
+        if (enabled && ministriesData?.ministries) {
+            setLocalMinistries([...ministriesData.ministries]);
+        }
+        // Close create form when exiting admin mode
+        if (!enabled) {
+            setShowCreateForm(false);
+        }
+    };
+
+    // Handle ministry creation
+    const handleMinistryCreate = (newMinistry: Ministry) => {
+        setLocalMinistries(prev => [newMinistry, ...prev]);
+        setShowCreateForm(false);
+        // Optionally refetch to sync with server
+        refetch();
+        // Show success message
+        alert(`✅ Successfully created "${newMinistry.name}" ministry!`);
+    };
+
+    // Handle ministry update
+    const handleMinistryUpdate = (updatedMinistry: Ministry) => {
+        setLocalMinistries(prev =>
+            prev.map(ministry =>
+                ministry.id === updatedMinistry.id ? updatedMinistry : ministry
+            )
+        );
+        // Optionally refetch to sync with server
+        refetch();
+    };
+
+    // Handle ministry delete
+    const handleMinistryDelete = (deletedMinistryId: string) => {
+        setLocalMinistries(prev =>
+            prev.filter(ministry => ministry.id !== deletedMinistryId)
+        );
+        // Optionally refetch to sync with server
+        refetch();
+    };
 
     const stats = [
         {
@@ -83,13 +146,6 @@ export const Home: React.FC = () => {
                             >
                                 <ListBulletIcon className="h-6 w-6 mr-3" />
                                 Browse All Ministries
-                            </Link>
-                            <Link
-                                to="/create-ministry"
-                                className="inline-flex items-center px-8 py-4 bg-green-600 text-white font-semibold rounded-xl shadow-lg hover:bg-green-500 transition-colors"
-                            >
-                                <UsersIcon className="h-6 w-6 mr-3" />
-                                Create Ministry
                             </Link>
                         </div>
                     </div>
@@ -178,20 +234,82 @@ export const Home: React.FC = () => {
             {/* Featured Ministries */}
             <div className="py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
+                    <div className="text-center mb-8">
                         <h2 className="text-3xl font-bold text-gray-900 mb-4">
                             Featured Ministries
                         </h2>
-                        <p className="text-lg text-gray-600">
+                        <p className="text-lg text-gray-600 mb-6">
                             Discover opportunities to serve and grow in faith
                         </p>
+
+                        {/* Admin Mode Toggle */}
+                        <div className="flex items-center justify-center space-x-3 bg-gray-50 rounded-lg p-4 max-w-sm mx-auto">
+                            <CogIcon className="h-5 w-5 text-gray-500" />
+                            <span className="text-sm font-medium text-gray-700">Admin Mode</span>
+                            <ToggleSwitch
+                                enabled={isAdminMode}
+                                onToggle={() => handleAdminModeToggle(!isAdminMode)}
+                                size="sm"
+                            />
+                        </div>
+
+                        {isAdminMode && (
+                            <div className="mt-4 space-y-4 max-w-4xl mx-auto">
+                                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                    <p className="text-sm text-amber-800">
+                                        <strong>Admin Mode:</strong> You can now create, edit, and delete ministries directly from this page.
+                                        This is a demo feature and will be moved to a dedicated admin area in the future.
+                                    </p>
+                                </div>
+
+                                {/* Admin Action Buttons */}
+                                <div className="flex flex-wrap gap-3 justify-center">
+                                    <button
+                                        onClick={() => setShowCreateForm(!showCreateForm)}
+                                        className={`inline-flex items-center px-6 py-3 rounded-lg font-semibold shadow-sm transition-colors ${showCreateForm
+                                            ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            : 'bg-green-600 text-white hover:bg-green-700'
+                                            }`}
+                                    >
+                                        <UsersIcon className="h-5 w-5 mr-2" />
+                                        {showCreateForm ? 'Hide Create Form' : 'Create New Ministry'}
+                                    </button>
+                                </div>
+
+                                {/* Create Ministry Form */}
+                                {showCreateForm && (
+                                    <AdminMinistryCard
+                                        mode="create"
+                                        onCreate={handleMinistryCreate}
+                                        onCancel={() => setShowCreateForm(false)}
+                                        className="max-w-4xl mx-auto"
+                                    />
+                                )}
+
+                                <CrudTestPanel isVisible={true} />
+                            </div>
+                        )}
                     </div>
 
-                    {ministriesData?.ministries && (
+                    {displayMinistries.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {ministriesData.ministries.slice(0, 6).map((ministry) => (
-                                <MinistryCard key={ministry.id} ministry={ministry} />
+                            {displayMinistries.slice(0, 6).map((ministry) => (
+                                isAdminMode ? (
+                                    <AdminMinistryCard
+                                        key={ministry.id}
+                                        ministry={ministry}
+                                        onUpdate={handleMinistryUpdate}
+                                        onDelete={handleMinistryDelete}
+                                    />
+                                ) : (
+                                    <MinistryCard key={ministry.id} ministry={ministry} />
+                                )
                             ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12">
+                            <UsersIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-500">No ministries available at the moment.</p>
                         </div>
                     )}
 

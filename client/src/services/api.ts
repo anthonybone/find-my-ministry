@@ -169,6 +169,15 @@ export const ministryApi = {
     create: async (ministryData: Omit<Ministry, 'id' | 'createdAt' | 'updatedAt' | 'parish'>): Promise<Ministry> => {
         const response = await api.post('/ministries', ministryData);
         return response.data;
+    },
+
+    update: async (id: string, ministryData: Partial<Omit<Ministry, 'id' | 'createdAt' | 'updatedAt' | 'parish'>>): Promise<Ministry> => {
+        const response = await api.put(`/ministries/${id}`, ministryData);
+        return response.data;
+    },
+
+    delete: async (id: string): Promise<void> => {
+        await api.delete(`/ministries/${id}`);
     }
 };
 
