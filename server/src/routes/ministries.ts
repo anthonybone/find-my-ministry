@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { prisma } from '../index';
-import { validateMinistry } from '../validators/ministry';
+import { validateMinistry, createCheckDuplicateMinistry } from '../validators/ministry';
 
 const router = Router();
+
+// Create the duplicate check middleware with the prisma instance
+const checkDuplicateMinistry = createCheckDuplicateMinistry(prisma);
 
 // GET /api/ministries - Get all ministries with optional filters
 router.get('/', async (req, res) => {
@@ -150,7 +153,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/ministries - Create new ministry
-router.post('/', validateMinistry, async (req, res) => {
+router.post('/', validateMinistry, checkDuplicateMinistry, async (req, res) => {
     try {
         const ministry = await prisma.ministry.create({
             data: req.body,
@@ -166,12 +169,20 @@ router.post('/', validateMinistry, async (req, res) => {
         res.status(201).json(ministry);
     } catch (error) {
         console.error('Error creating ministry:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        // Handle database-level constraint violation as backup
+        if (error instanceof Error && (error as any).code === 'P2002') {
+            res.status(409).json({
+                error: 'Duplicate ministry',
+                message: 'A ministry with this name already exists in this parish'
+            });
+        } else {
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 });
 
 // PUT /api/ministries/:id - Update ministry
-router.put('/:id', validateMinistry, async (req, res) => {
+router.put('/:id', validateMinistry, checkDuplicateMinistry, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -192,6 +203,11 @@ router.put('/:id', validateMinistry, async (req, res) => {
         console.error('Error updating ministry:', error);
         if (error instanceof Error && (error as any).code === 'P2025') {
             res.status(404).json({ error: 'Ministry not found' });
+        } else if (error instanceof Error && (error as any).code === 'P2002') {
+            res.status(409).json({
+                error: 'Duplicate ministry',
+                message: 'A ministry with this name already exists in this parish'
+            });
         } else {
             res.status(500).json({ error: 'Internal server error' });
         }

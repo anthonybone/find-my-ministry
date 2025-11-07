@@ -87,6 +87,7 @@ model Ministry {
   parishId      String
   parish        Parish        @relation(fields: [parishId], references: [id])
   
+  @@unique([name, parishId], name: "unique_ministry_per_parish")
   @@map("ministries")
 }
 
