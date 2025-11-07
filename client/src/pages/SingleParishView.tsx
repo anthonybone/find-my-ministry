@@ -1,0 +1,134 @@
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Parish } from '../services/api';
+import { ParishCard } from '../components/ParishCard';
+import { useParishData } from '../hooks/useMinistryData';
+import { LoadingState, ErrorState } from '../components/common/LoadingStates';
+import {
+    BuildingLibraryIcon,
+    ArrowLeftIcon
+} from '@heroicons/react/24/outline';
+
+export const SingleParishView: React.FC = () => {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    const { data: parishesData, isLoading, error } = useParishData();
+
+    const handleBack = () => {
+        navigate(-1); // Go back to previous page
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <LoadingState message="Loading parish..." size="lg" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <ErrorState
+                    message="Failed to load parish. Please try again later."
+                    onRetry={() => window.location.reload()}
+                />
+            </div>
+        );
+    }
+
+    const parishes = parishesData?.parishes || [];
+    const parish = parishes.find((p: Parish) => p.id === id);
+
+    if (!parish) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* Back Button */}
+                    <div className="mb-6">
+                        <button
+                            onClick={handleBack}
+                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        >
+                            <ArrowLeftIcon className="w-4 h-4 mr-2" />
+                            Back
+                        </button>
+                    </div>
+
+                    <div className="text-center py-12">
+                        <BuildingLibraryIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                            Parish Not Found
+                        </h3>
+                        <p className="text-gray-600 max-w-md mx-auto">
+                            The parish you're looking for could not be found. It may have been removed or the link is incorrect.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Back Button */}
+                <div className="mb-6">
+                    <button
+                        onClick={handleBack}
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    >
+                        <ArrowLeftIcon className="w-4 h-4 mr-2" />
+                        Back
+                    </button>
+                </div>
+
+                {/* Page Title */}
+                <div className="text-center mb-8">
+                    <div className="flex items-center justify-center mb-4">
+                        <BuildingLibraryIcon className="h-8 w-8 text-primary-600 mr-3" />
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            Parish Information
+                        </h1>
+                    </div>
+                    <p className="text-gray-600">
+                        Detailed information about {parish.name}
+                    </p>
+                </div>
+
+                {/* Single Parish Card */}
+                <div className="flex justify-center">
+                    <div className="w-full max-w-md">
+                        <ParishCard parish={parish} />
+                    </div>
+                </div>
+
+                {/* Additional Actions */}
+                <div className="mt-8 text-center">
+                    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">
+                            Explore More
+                        </h3>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <button
+                                onClick={() => navigate('/parishes')}
+                                className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                            >
+                                <BuildingLibraryIcon className="h-4 w-4 mr-2" />
+                                Browse All Parishes
+                            </button>
+                            {parish._count?.ministries && parish._count.ministries > 0 && (
+                                <button
+                                    onClick={() => navigate(`/list?parish=${parish.id}`)}
+                                    className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                                >
+                                    View {parish._count.ministries} {parish._count.ministries === 1 ? 'Ministry' : 'Ministries'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};

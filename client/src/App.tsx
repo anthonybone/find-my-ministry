@@ -5,6 +5,7 @@ import { Home } from './pages/Home';
 import { MapView } from './pages/MapView';
 import { ListView } from './pages/ListView';
 import { ParishList } from './pages/ParishList';
+import { SingleParishView } from './pages/SingleParishView';
 import { MeetingTimesSearch } from './pages/MeetingTimesSearch';
 import { MinistryDetail } from './pages/MinistryDetail';
 import { ParishDetail } from './pages/ParishDetail';
@@ -20,6 +21,7 @@ function App() {
                     <Route path="/map" element={<MapView />} />
                     <Route path="/list" element={<ListView />} />
                     <Route path="/parishes" element={<ParishList />} />
+                    <Route path="/parish-view/:id" element={<SingleParishView />} />
                     <Route path="/meeting-times" element={<MeetingTimesSearch />} />
                     <Route path="/ministry/:id" element={<MinistryDetail />} />
                     <Route path="/parish/:id" element={<ParishDetail />} />

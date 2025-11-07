@@ -91,9 +91,14 @@ export const MinistryCard: React.FC<MinistryCardProps> = ({ ministry }) => {
                     </h3>
                     <div className="flex items-center text-sm text-gray-500">
                         <MapPinIcon className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
-                        <span className="font-medium text-gray-600 truncate">
+                        <Link
+                            to={`/parish-view/${ministry.parish.id}`}
+                            className="font-medium text-gray-600 hover:text-primary-600 hover:underline transition-colors truncate z-10 relative"
+                            onClick={(e) => e.stopPropagation()}
+                            title={`View ${ministry.parish.name} parish card`}
+                        >
                             {ministry.parish.name}
-                        </span>
+                        </Link>
                         <span className="mx-1.5 text-gray-400">•</span>
                         <span className="text-gray-500 truncate">
                             {ministry.parish.city}
