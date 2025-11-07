@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     MapIcon,
     ListBulletIcon,
@@ -21,9 +21,9 @@ import { Ministry } from '../services/api';
 import '../utils/testCrudOperations';
 
 export const Home: React.FC = () => {
+    const navigate = useNavigate();
     const { searchQuery, setSearchQuery, handleSearch } = useSearch();
     const [isAdminMode, setIsAdminMode] = useState(false);
-    const [showCreateForm, setShowCreateForm] = useState(false);
     const [localMinistries, setLocalMinistries] = useState<Ministry[]>([]);
 
     // Fetch recent ministries for homepage (exclude placeholders by default)
@@ -48,16 +48,11 @@ export const Home: React.FC = () => {
         if (enabled && ministriesData?.ministries) {
             setLocalMinistries([...ministriesData.ministries]);
         }
-        // Close create form when exiting admin mode
-        if (!enabled) {
-            setShowCreateForm(false);
-        }
     };
 
-    // Handle ministry creation
+    // Handle ministry creation (for admin mode updates)
     const handleMinistryCreate = (newMinistry: Ministry) => {
         setLocalMinistries(prev => [newMinistry, ...prev]);
-        setShowCreateForm(false);
         // Optionally refetch to sync with server
         refetch();
         // Show success message
@@ -265,26 +260,13 @@ export const Home: React.FC = () => {
                                 {/* Admin Action Buttons */}
                                 <div className="flex flex-wrap gap-3 justify-center">
                                     <button
-                                        onClick={() => setShowCreateForm(!showCreateForm)}
-                                        className={`inline-flex items-center px-6 py-3 rounded-lg font-semibold shadow-sm transition-colors ${showCreateForm
-                                            ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                            : 'bg-green-600 text-white hover:bg-green-700'
-                                            }`}
+                                        onClick={() => navigate('/create-ministry')}
+                                        className="inline-flex items-center px-6 py-3 rounded-lg font-semibold shadow-sm transition-colors bg-green-600 text-white hover:bg-green-700"
                                     >
                                         <UsersIcon className="h-5 w-5 mr-2" />
-                                        {showCreateForm ? 'Hide Create Form' : 'Create New Ministry'}
+                                        Create New Ministry
                                     </button>
                                 </div>
-
-                                {/* Create Ministry Form */}
-                                {showCreateForm && (
-                                    <AdminMinistryCard
-                                        mode="create"
-                                        onCreate={handleMinistryCreate}
-                                        onCancel={() => setShowCreateForm(false)}
-                                        className="max-w-4xl mx-auto"
-                                    />
-                                )}
 
                                 <CrudTestPanel isVisible={true} />
                             </div>

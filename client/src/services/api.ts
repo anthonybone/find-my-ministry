@@ -100,6 +100,7 @@ export type MinistryType =
     | 'FUNDRAISING'
     | 'RETREAT_MINISTRY'
     | 'MISSION_OUTREACH'
+    | 'TEST'
     | 'OTHER';
 
 export type AgeGroup =

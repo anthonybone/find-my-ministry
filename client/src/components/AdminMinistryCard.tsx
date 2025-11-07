@@ -52,7 +52,8 @@ const getMinistryCardStyle = (type: string): string => {
         'SOCIAL_JUSTICE': 'border-l-4 border-l-orange-400',
         'MARRIAGE_FAMILY': 'border-l-4 border-l-pink-400',
         'RCIA': 'border-l-4 border-l-indigo-400',
-        'RELIGIOUS_EDUCATION': 'border-l-4 border-l-indigo-400'
+        'RELIGIOUS_EDUCATION': 'border-l-4 border-l-indigo-400',
+        'TEST': 'border-l-4 border-l-red-400'
     };
     return cardStyles[type] || 'border-l-4 border-l-gray-400';
 };
@@ -70,7 +71,8 @@ const getMinistryBadgeClass = (type: string): string => {
         'SOCIAL_JUSTICE': 'ministry-badge service',
         'MARRIAGE_FAMILY': 'ministry-badge family',
         'RCIA': 'ministry-badge education',
-        'RELIGIOUS_EDUCATION': 'ministry-badge education'
+        'RELIGIOUS_EDUCATION': 'ministry-badge education',
+        'TEST': 'ministry-badge default'
     };
     return badgeClasses[type] || 'ministry-badge default';
 };

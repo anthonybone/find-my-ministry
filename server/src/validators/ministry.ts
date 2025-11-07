@@ -36,6 +36,7 @@ const ministrySchema = Joi.object({
         'FUNDRAISING',
         'RETREAT_MINISTRY',
         'MISSION_OUTREACH',
+        'TEST',
         'OTHER'
     ),
     ageGroups: Joi.array().items(
@@ -54,9 +55,9 @@ const ministrySchema = Joi.object({
     startDate: Joi.date().iso().optional(),
     endDate: Joi.date().iso().optional(),
     isOngoing: Joi.boolean().default(true),
-    contactName: Joi.string().optional().max(100),
-    contactPhone: Joi.string().optional().max(20),
-    contactEmail: Joi.string().email().optional(),
+    contactName: Joi.string().allow('').optional().max(100),
+    contactPhone: Joi.string().allow('').optional().max(20),
+    contactEmail: Joi.string().email().allow('').optional(),
     requiresRegistration: Joi.boolean().default(false),
     registrationDeadline: Joi.date().iso().optional(),
     maxParticipants: Joi.number().integer().min(1).optional(),
@@ -64,7 +65,7 @@ const ministrySchema = Joi.object({
     isAccessible: Joi.boolean().default(true),
     requirements: Joi.array().items(Joi.string()).default([]),
     materials: Joi.array().items(Joi.string()).default([]),
-    cost: Joi.string().optional().max(100),
+    cost: Joi.string().allow('').optional().max(100),
     isActive: Joi.boolean().default(true),
     isPublic: Joi.boolean().default(true),
     parishId: Joi.string().required()

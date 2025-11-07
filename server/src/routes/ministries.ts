@@ -252,6 +252,7 @@ router.get('/meta/types', (req, res) => {
         'FUNDRAISING',
         'RETREAT_MINISTRY',
         'MISSION_OUTREACH',
+        'TEST',
         'OTHER'
     ];
 

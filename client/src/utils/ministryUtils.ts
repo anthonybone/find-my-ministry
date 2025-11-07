@@ -35,6 +35,7 @@ export const MINISTRY_TYPE_DISPLAY: Record<MinistryType, string> = {
     'FUNDRAISING': 'Fundraising',
     'RETREAT_MINISTRY': 'Retreat Ministry',
     'MISSION_OUTREACH': 'Mission & Outreach',
+    'TEST': 'Test',
     'OTHER': 'Other'
 };
 
