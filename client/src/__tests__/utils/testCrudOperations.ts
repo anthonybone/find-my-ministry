@@ -59,6 +59,7 @@ export class CrudTester {
     async testRead(ministryId: string): Promise<Ministry | null> {
         try {
             console.log('🟡 Testing READ operation...');
+            // eslint-disable-next-line testing-library/no-await-sync-query
             const ministry = await ministryApi.getById(ministryId);
             console.log('✅ READ successful:', ministry);
             return ministry;
@@ -100,6 +101,7 @@ export class CrudTester {
 
             // Verify deletion by trying to read the ministry
             try {
+                // eslint-disable-next-line testing-library/no-await-sync-query
                 await ministryApi.getById(ministryId);
                 console.log('❌ DELETE verification failed - ministry still exists');
                 return false;

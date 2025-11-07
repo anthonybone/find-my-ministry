@@ -18,7 +18,7 @@ import { ToggleSwitch } from '../components/common/ToggleSwitch';
 import { Ministry } from '../services/api';
 
 // Import CRUD testing utility for development
-import '../utils/testCrudOperations';
+import '../__tests__/utils/testCrudOperations';
 
 export const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -27,10 +27,10 @@ export const Home: React.FC = () => {
     const [localMinistries, setLocalMinistries] = useState<Ministry[]>([]);
 
     // Fetch recent ministries for homepage (exclude placeholders by default)
-    const { data: ministriesData, refetch } = useMinistryData({ includePlaceholders: false });
+    const { data: ministriesData, refetch, isLoading: ministriesLoading, error: ministriesError } = useMinistryData({ includePlaceholders: false });
 
     // Fetch parishes count
-    const { data: parishesData } = useParishData();
+    const { data: parishesData, isLoading: parishesLoading, error: parishesError } = useParishData();
 
     // Use local ministries state when in admin mode, otherwise use fetched data
     const displayMinistries = isAdminMode ? localMinistries : ministriesData?.ministries || [];
@@ -51,6 +51,7 @@ export const Home: React.FC = () => {
     };
 
     // Handle ministry creation (for admin mode updates)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleMinistryCreate = (newMinistry: Ministry) => {
         setLocalMinistries(prev => [newMinistry, ...prev]);
         // Optionally refetch to sync with server
@@ -82,13 +83,13 @@ export const Home: React.FC = () => {
     const stats = [
         {
             name: 'Active Ministries',
-            value: ministriesData?.pagination?.total || 0,
+            value: ministriesLoading ? '...' : (ministriesData?.pagination?.total || 0),
             icon: UsersIcon,
             color: 'text-primary-600'
         },
         {
             name: 'Parishes',
-            value: parishesData?.pagination?.total || 0,
+            value: parishesLoading ? '...' : (parishesData?.pagination?.total || 0),
             icon: ChurchIcon,
             color: 'text-green-600'
         },
@@ -287,6 +288,22 @@ export const Home: React.FC = () => {
                                     <MinistryCard key={ministry.id} ministry={ministry} />
                                 )
                             ))}
+                        </div>
+                    ) : ministriesLoading ? (
+                        <div className="text-center py-12">
+                            <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                            <p className="text-gray-500">Loading ministries...</p>
+                        </div>
+                    ) : ministriesError ? (
+                        <div className="text-center py-12 bg-red-50 rounded-lg border border-red-200">
+                            <p className="text-red-600 mb-2">Error loading ministries:</p>
+                            <p className="text-red-500 text-sm">{(ministriesError as Error)?.message || 'Unknown error'}</p>
+                            <button
+                                onClick={() => refetch()}
+                                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                            >
+                                Try Again
+                            </button>
                         </div>
                     ) : (
                         <div className="text-center py-12">

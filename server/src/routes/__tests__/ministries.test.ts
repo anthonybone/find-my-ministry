@@ -4,11 +4,9 @@ import { getTestPrismaClient, createTestDiocese, createTestParish, createTestMin
 
 // Mock the prisma import in ministries.ts
 const mockPrisma = getTestPrismaClient();
-jest.mock('../../index', () => ({
+jest.mock('../../lib/prisma', () => ({
     prisma: mockPrisma,
-}));
-
-// Now import the routes after mocking
+}));// Now import the routes after mocking
 const ministryRoutes = require('../ministries').default;
 
 // Create a minimal Express app for testing

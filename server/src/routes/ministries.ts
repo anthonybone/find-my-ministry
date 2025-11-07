@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { prisma } from '../index';
+import { prisma } from '../lib/prisma';
 import { validateMinistry, createCheckDuplicateMinistry } from '../validators/ministry';
 
 const router = Router();

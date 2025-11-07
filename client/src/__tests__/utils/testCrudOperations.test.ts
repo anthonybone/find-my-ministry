@@ -1,6 +1,7 @@
 import { crudTester, runQuickCrudTest } from './testCrudOperations';
 
 // Mock the API
+/* eslint-disable testing-library/no-await-sync-query */
 jest.mock('../../services/api', () => ({
     ministryApi: {
         create: jest.fn(),
@@ -13,8 +14,7 @@ jest.mock('../../services/api', () => ({
         getAll: jest.fn(),
     },
 }));
-
-describe('CRUD Test Utilities', () => {
+/* eslint-enable testing-library/no-await-sync-query */describe('CRUD Test Utilities', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         // Clear console logs

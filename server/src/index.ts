@@ -6,7 +6,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './lib/prisma';
 import diocesesRouter from './routes/dioceses';
 import parishesRouter from './routes/parishes';
 import ministriesRouter from './routes/ministries';
@@ -18,9 +18,6 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
-
-// Initialize Prisma Client
-export const prisma = new PrismaClient();
 
 // Rate limiting
 const limiter = rateLimit({
