@@ -84,6 +84,13 @@ export const Home: React.FC = () => {
                                 <ListBulletIcon className="h-6 w-6 mr-3" />
                                 Browse All Ministries
                             </Link>
+                            <Link
+                                to="/create-ministry"
+                                className="inline-flex items-center px-8 py-4 bg-green-600 text-white font-semibold rounded-xl shadow-lg hover:bg-green-500 transition-colors"
+                            >
+                                <UsersIcon className="h-6 w-6 mr-3" />
+                                Create Ministry
+                            </Link>
                         </div>
                     </div>
                 </div>

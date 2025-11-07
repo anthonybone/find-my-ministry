@@ -10,6 +10,7 @@ import { MeetingTimesSearch } from './pages/MeetingTimesSearch';
 import { MinistryDetail } from './pages/MinistryDetail';
 import { ParishDetail } from './pages/ParishDetail';
 import { SearchResults } from './pages/SearchResults';
+import { CreateMinistry } from './pages/CreateMinistry';
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
                     <Route path="/ministry/:id" element={<MinistryDetail />} />
                     <Route path="/parish/:id" element={<ParishDetail />} />
                     <Route path="/search" element={<SearchResults />} />
+                    <Route path="/create-ministry" element={<CreateMinistry />} />
                 </Routes>
             </main>
         </div>

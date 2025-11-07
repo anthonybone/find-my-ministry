@@ -164,6 +164,11 @@ export const ministryApi = {
     getAgeGroups: async (): Promise<AgeGroup[]> => {
         const response = await api.get('/ministries/meta/age-groups');
         return response.data;
+    },
+
+    create: async (ministryData: Omit<Ministry, 'id' | 'createdAt' | 'updatedAt' | 'parish'>): Promise<Ministry> => {
+        const response = await api.post('/ministries', ministryData);
+        return response.data;
     }
 };
 
