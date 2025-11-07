@@ -1,24 +1,41 @@
 import React from 'react';
-import { MinistryType } from '../services/api';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useQuery } from 'react-query';
+import { MinistryType, parishApi } from '../services/api';
 import { MinistryCard } from '../components/MinistryCard';
-import { useMinistryData } from '../hooks/useMinistryData';
+import { useMinistryData, useParishData } from '../hooks/useMinistryData';
 import { useSearch } from '../hooks/useSearch';
 import { useDevMode, useFilters } from '../hooks/useCommon';
 import { SearchBar } from '../components/common/SearchBar';
 import { ToggleSwitch } from '../components/common/ToggleSwitch';
-import { LoadingState, ErrorState } from '../components/common/LoadingStates';
+import { LoadingState } from '../components/common/LoadingStates';
 import {
     FunnelIcon
 } from '@heroicons/react/24/outline';
 
 export const ListView: React.FC = () => {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const parishId = searchParams.get('parish');
+
+    // Get parish data if filtering by parish
+    const { data: parishData } = useQuery(
+        ['parish', parishId],
+        () => parishApi.getById(parishId!),
+        { enabled: !!parishId }
+    );
+
+    // Get all parishes for filter dropdown
+    const { data: allParishesData } = useParishData();
+
     const { searchQuery, setSearchQuery, handleSearch } = useSearch();
     const { isDevMode, toggleDevMode } = useDevMode();
 
     const initialFilters = {
         type: '' as MinistryType | '',
         ageGroups: [] as string[],
-        languages: [] as string[]
+        languages: [] as string[],
+        parishId: parishId || ''
     };
 
     const {
@@ -46,7 +63,8 @@ export const ListView: React.FC = () => {
     }, [isDevMode, toggleDevMode]);
 
     const { data: ministriesData, isLoading } = useMinistryData({
-        includePlaceholders: showPlaceholders
+        includePlaceholders: showPlaceholders,
+        parishId: parishId || undefined
     });
 
     if (isLoading) {
@@ -62,9 +80,24 @@ export const ListView: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                        Browse Ministries
-                    </h1>
+                    <div className="flex items-center justify-between mb-4">
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            {parishId && parishData ? `Ministries at ${parishData.name}` : 'Browse Ministries'}
+                        </h1>
+                        {parishId && (
+                            <Link
+                                to="/list"
+                                className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                            >
+                                ← Back to All Ministries
+                            </Link>
+                        )}
+                    </div>
+                    {parishId && parishData && (
+                        <p className="text-gray-600 mb-4">
+                            {parishData.address}, {parishData.city}, {parishData.state} {parishData.zipCode}
+                        </p>
+                    )}
 
                     {/* Search and Filters */}
                     <div className="flex flex-col lg:flex-row gap-4">
@@ -92,10 +125,12 @@ export const ListView: React.FC = () => {
                                     setSearchQuery('');
                                     resetFilters();
                                     setShowPlaceholders(false);
+                                    // Clear parish filter by navigating to /list without query params
+                                    navigate('/list');
                                 }}
                                 className="inline-flex items-center px-4 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                             >
-                                Reset Filters
+                                Clear All Filters
                             </button>
                         </div>
                     </div>
@@ -119,7 +154,7 @@ export const ListView: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Ministry Type
@@ -135,6 +170,31 @@ export const ListView: React.FC = () => {
                                         <option value="FOOD_PANTRY">Food Pantry</option>
                                         <option value="SENIORS_MINISTRY">Seniors Ministry</option>
                                         <option value="COMMUNITY_SERVICE">Community Service</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Parish
+                                    </label>
+                                    <select
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                        value={filters.parishId}
+                                        onChange={(e) => {
+                                            const newParishId = e.target.value;
+                                            if (newParishId) {
+                                                navigate(`/list?parish=${newParishId}`);
+                                            } else {
+                                                navigate('/list');
+                                            }
+                                        }}
+                                    >
+                                        <option value="">All Parishes</option>
+                                        {allParishesData?.parishes?.map((parish: any) => (
+                                            <option key={parish.id} value={parish.id}>
+                                                {parish.name}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 
@@ -175,6 +235,11 @@ export const ListView: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <p className="text-gray-600">
                             {ministriesData?.ministries?.length || 0} ministries found
+                            {parishId && parishData && (
+                                <span className="ml-2 text-primary-600 font-medium">
+                                    at {parishData.name}
+                                </span>
+                            )}
                         </p>
                         <div className="flex items-center gap-4">
                             {!showPlaceholders && (
@@ -202,19 +267,51 @@ export const ListView: React.FC = () => {
                     <div className="text-center py-12">
                         <div className="text-gray-400 text-6xl mb-4">🔍</div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No ministries found</h3>
-                        <p className="text-gray-600 mb-4">
-                            Try adjusting your search terms or filters
-                        </p>
-                        <button
-                            onClick={() => {
-                                setSearchQuery('');
-                                resetFilters();
-                                setShowPlaceholders(false);
-                            }}
-                            className="text-primary-600 hover:text-primary-700 font-medium"
-                        >
-                            Clear all filters
-                        </button>
+                        {parishId && parishData ? (
+                            <div>
+                                <p className="text-gray-600 mb-4">
+                                    No active ministries found at {parishData.name}.
+                                    {!showPlaceholders && (
+                                        <span className="block mt-1">
+                                            This parish may have sample ministries you can view for reference.
+                                        </span>
+                                    )}
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                                    {!showPlaceholders && (
+                                        <button
+                                            onClick={() => setShowPlaceholders(true)}
+                                            className="inline-flex items-center px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors font-medium"
+                                        >
+                                            Show Sample Ministries
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => navigate('/list')}
+                                        className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                                    >
+                                        Browse All Ministries
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <p className="text-gray-600 mb-4">
+                                    Try adjusting your search terms or filters
+                                </p>
+                                <button
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        resetFilters();
+                                        setShowPlaceholders(false);
+                                        navigate('/list');
+                                    }}
+                                    className="text-primary-600 hover:text-primary-700 font-medium"
+                                >
+                                    Clear all filters
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

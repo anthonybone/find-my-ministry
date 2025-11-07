@@ -115,6 +115,7 @@ export interface SearchFilters {
     query?: string;
     type?: MinistryType;
     location?: string;
+    parishId?: string;
     ageGroups?: string[];
     languages?: string[];
     includePlaceholders?: boolean;
@@ -139,6 +140,7 @@ export const ministryApi = {
         if (filters?.query) params.append('search', filters.query);
         if (filters?.type) params.append('type', filters.type);
         if (filters?.location) params.append('location', filters.location);
+        if (filters?.parishId) params.append('parishId', filters.parishId);
         if (filters?.ageGroups) params.append('ageGroups', filters.ageGroups.join(','));
         if (filters?.languages) params.append('languages', filters.languages.join(','));
         if (filters?.includePlaceholders) params.append('includePlaceholders', filters.includePlaceholders.toString());
