@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { MagnifyingGlassIcon, ClockIcon, MapPinIcon, BuildingLibraryIcon } from '@heroicons/react/24/outline';
+import { useLocation } from 'react-router-dom';
 import { searchApi } from '../../services/api';
 import { API_CONFIG } from '../../utils/constants';
 import { useDebounce } from '../../hooks';
@@ -27,26 +28,51 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const suggestionsRef = useRef<HTMLDivElement>(null);
+    const location = useLocation();
+
+    // Don't make suggestion calls if we're on the search results page
+    const isOnSearchPage = location.pathname === '/search';
 
     // Debounced suggestion fetching
     const debouncedGetSuggestions = useDebounce(async (query: string) => {
+        // Don't fetch suggestions if we're on the search results page or user has already searched
+        if (isOnSearchPage || hasSearched) {
+            return;
+        }
+
         if (query.length >= API_CONFIG.SEARCH_MIN_QUERY_LENGTH) {
-            setIsLoading(true);
+            // Only show loading if we don't have any suggestions yet
+            const shouldShowLoading = suggestions.length === 0;
+            if (shouldShowLoading) {
+                setIsLoading(true);
+            }
+
             try {
                 const result = await searchApi.getSuggestions(query);
-                setSuggestions(result.suggestions || []);
-                setShowSuggestions(true);
+                // Only update suggestions if this is still the current query
+                if (query === searchQuery && !isOnSearchPage && !hasSearched) {
+                    setSuggestions(result.suggestions || []);
+                    setShowSuggestions(true);
+                }
             } catch (error) {
                 console.error('Failed to get suggestions:', error);
-                setSuggestions([]);
+                // Only clear suggestions if this was for the current query
+                if (query === searchQuery) {
+                    setSuggestions([]);
+                }
             } finally {
-                setIsLoading(false);
+                // Only clear loading if this was for the current query
+                if (query === searchQuery) {
+                    setIsLoading(false);
+                }
             }
         } else {
             setSuggestions([]);
             setShowSuggestions(false);
+            setIsLoading(false);
         }
     }, API_CONFIG.SEARCH_DEBOUNCE_MS);
 
@@ -54,6 +80,44 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     useEffect(() => {
         debouncedGetSuggestions(searchQuery);
     }, [searchQuery, debouncedGetSuggestions]);
+
+    // Clear suggestions and loading state when searchQuery becomes empty
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            setSuggestions([]);
+            setShowSuggestions(false);
+            setIsLoading(false);
+            setHasSearched(false);
+            // Cancel any pending requests
+            debouncedGetSuggestions.cancel();
+        }
+    }, [searchQuery, debouncedGetSuggestions]);
+
+    // Reset hasSearched flag when user changes the query significantly (not on search page)
+    useEffect(() => {
+        if (!isOnSearchPage && searchQuery.trim() !== '') {
+            setHasSearched(false);
+        }
+    }, [searchQuery, isOnSearchPage]);
+
+    // Clear suggestions and reset state when navigating away from search page
+    useEffect(() => {
+        if (!isOnSearchPage) {
+            setHasSearched(false);
+        } else {
+            // Clear suggestions when on search page
+            setSuggestions([]);
+            setShowSuggestions(false);
+            setIsLoading(false);
+        }
+    }, [isOnSearchPage]);
+
+    // Cancel any pending requests when search query changes
+    useEffect(() => {
+        return () => {
+            debouncedGetSuggestions.cancel();
+        };
+    }, [searchQuery]);
 
     // Close suggestions when clicking outside
     useEffect(() => {
@@ -74,6 +138,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const handleSuggestionClick = (suggestion: Suggestion) => {
         onSearchChange(suggestion.text);
         setShowSuggestions(false);
+        setSuggestions([]); // Clear suggestions to prevent flicker
+        setIsLoading(false);
+        setHasSearched(true);
+        // Cancel any pending debounced calls
+        debouncedGetSuggestions.cancel();
         // Trigger search immediately
         const fakeEvent = { preventDefault: () => { } } as React.FormEvent;
         onSearch(fakeEvent);
@@ -101,9 +170,20 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         }
     };
 
+    const handleFormSubmit = (e: React.FormEvent) => {
+        // Hide suggestions immediately when searching
+        setShowSuggestions(false);
+        setSuggestions([]);
+        setIsLoading(false);
+        setHasSearched(true);
+        // Cancel any pending debounced calls
+        debouncedGetSuggestions.cancel();
+        onSearch(e);
+    };
+
     return (
         <div className={`relative ${className}`}>
-            <form onSubmit={onSearch}>
+            <form onSubmit={handleFormSubmit}>
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
                 </div>
@@ -120,19 +200,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             </form>
 
             {/* Suggestions Dropdown */}
-            {showSuggestions && (suggestions.length > 0 || isLoading) && (
+            {!isOnSearchPage && showSuggestions && (suggestions.length > 0 || isLoading) && (
                 <div
                     ref={suggestionsRef}
                     className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
                 >
-                    {isLoading && (
-                        <div className="px-4 py-3 text-sm text-gray-500 flex items-center">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600 mr-2"></div>
-                            Searching...
-                        </div>
-                    )}
-
-                    {!isLoading && suggestions.length > 0 && (
+                    {suggestions.length > 0 && (
                         <>
                             <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase border-b border-gray-100">
                                 Suggestions
@@ -157,6 +230,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                                 </button>
                             ))}
                         </>
+                    )}
+
+                    {isLoading && suggestions.length === 0 && (
+                        <div className="px-4 py-3 text-sm text-gray-500 flex items-center">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600 mr-2"></div>
+                            Searching...
+                        </div>
                     )}
 
                     {!isLoading && suggestions.length === 0 && searchQuery.length >= 2 && (
