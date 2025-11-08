@@ -3,12 +3,9 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { MinistryType, parishApi } from '../services/api';
 import { MinistryCard } from '../components/MinistryCard';
-import { useMinistryData, useParishData } from '../hooks/useMinistryData';
-import { useSearch } from '../hooks/useSearch';
-import { useDevMode, useFilters } from '../hooks/useCommon';
-import { SearchBar } from '../components/common/SearchBar';
-import { ToggleSwitch } from '../components/common/ToggleSwitch';
-import { LoadingState } from '../components/common/LoadingStates';
+import { useMinistryData, useParishData, useSearch, useDevMode, useFilters, useSort } from '../hooks';
+import { SearchBar, ToggleSwitch, LoadingState, SortControls } from '../components/common';
+import { sortMinistries, SortOption } from '../utils';
 import {
     FunnelIcon
 } from '@heroicons/react/24/outline';
@@ -30,6 +27,7 @@ export const ListView: React.FC = () => {
 
     const { searchQuery, setSearchQuery, handleSearch } = useSearch();
     const { isDevMode, toggleDevMode } = useDevMode();
+    const { sortOption, sortConfig, updateSort } = useSort({ defaultSort: 'name-asc' });
 
     const initialFilters = {
         type: '' as MinistryType | '',
@@ -66,6 +64,15 @@ export const ListView: React.FC = () => {
         includePlaceholders: showPlaceholders,
         parishId: parishId || undefined
     });
+
+    // Sort ministries based on current sort configuration
+    const sortedMinistries = React.useMemo(() => {
+        if (!ministriesData?.ministries) return [];
+        return sortMinistries(ministriesData.ministries, sortConfig);
+    }, [ministriesData?.ministries, sortConfig]);
+
+    // Available sort options for ministries
+    const ministrySortOptions: SortOption[] = ['name-asc', 'name-desc', 'type-asc', 'type-desc'];
 
     if (isLoading) {
         return (
@@ -232,9 +239,17 @@ export const ListView: React.FC = () => {
 
                 {/* Results */}
                 <div className="mb-6">
+                    <SortControls
+                        sortOption={sortOption}
+                        onSortChange={updateSort}
+                        availableOptions={ministrySortOptions}
+                        resultCount={sortedMinistries?.length || 0}
+                        itemType="ministries"
+                        className="mb-4"
+                    />
                     <div className="flex items-center justify-between">
-                        <p className="text-gray-600">
-                            {ministriesData?.ministries?.length || 0} ministries found
+                        <p className="text-gray-600 sr-only">
+                            {sortedMinistries?.length || 0} ministries found
                             {parishId && parishData && (
                                 <span className="ml-2 text-primary-600 font-medium">
                                     at {parishData.name}
@@ -257,9 +272,9 @@ export const ListView: React.FC = () => {
                 </div>
 
                 {/* Ministry Grid */}
-                {ministriesData?.ministries && ministriesData.ministries.length > 0 ? (
+                {sortedMinistries && sortedMinistries.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {ministriesData.ministries.map((ministry) => (
+                        {sortedMinistries.map((ministry) => (
                             <MinistryCard key={ministry.id} ministry={ministry} />
                         ))}
                     </div>

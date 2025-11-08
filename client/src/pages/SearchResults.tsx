@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { searchApi, Ministry, Parish } from '../services/api';
 import { MinistryCard } from '../components/MinistryCard';
-import { LoadingState } from '../components/common/LoadingStates';
+import { LoadingState, SortControls } from '../components/common';
+import { sortMinistries, sortParishes, SortOption } from '../utils';
+import { useSort } from '../hooks';
 import {
     MagnifyingGlassIcon,
     MapPinIcon,
@@ -22,6 +24,25 @@ export const SearchResults: React.FC = () => {
     const [results, setResults] = useState<SearchResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const { sortOption, sortConfig, updateSort } = useSort({ defaultSort: 'name-asc' });
+
+    // Sort results when they change or sort option changes
+    const sortedMinistries = useMemo(() => {
+        if (!results?.ministries) return [];
+        return sortMinistries(results.ministries, sortConfig);
+    }, [results?.ministries, sortConfig]);
+
+    const sortedParishes = useMemo(() => {
+        if (!results?.parishes) return [];
+        return sortParishes(results.parishes, {
+            field: sortConfig.field === 'type' ? 'name' : sortConfig.field as 'name' | 'city',
+            direction: sortConfig.direction
+        });
+    }, [results?.parishes, sortConfig]);
+
+    const ministrySortOptions: SortOption[] = ['name-asc', 'name-desc', 'type-asc', 'type-desc'];
+    const parishSortOptions: SortOption[] = ['name-asc', 'name-desc'];
 
     useEffect(() => {
         if (query.trim()) {
@@ -112,8 +133,16 @@ export const SearchResults: React.FC = () => {
                                         Parishes ({results.parishes.length})
                                     </h2>
                                 </div>
+                                <SortControls
+                                    sortOption={sortOption}
+                                    onSortChange={updateSort}
+                                    availableOptions={parishSortOptions}
+                                    resultCount={sortedParishes.length}
+                                    itemType="parishes"
+                                    className="mb-6"
+                                />
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {results.parishes.map((parish) => (
+                                    {sortedParishes.map((parish) => (
                                         <Link
                                             key={parish.id}
                                             to={`/parish/${parish.id}`}
@@ -153,8 +182,16 @@ export const SearchResults: React.FC = () => {
                                         Ministries ({results.ministries.length})
                                     </h2>
                                 </div>
+                                <SortControls
+                                    sortOption={sortOption}
+                                    onSortChange={updateSort}
+                                    availableOptions={ministrySortOptions}
+                                    resultCount={sortedMinistries.length}
+                                    itemType="ministries"
+                                    className="mb-6"
+                                />
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {results.ministries.map((ministry) => (
+                                    {sortedMinistries.map((ministry) => (
                                         <MinistryCard key={ministry.id} ministry={ministry} />
                                     ))}
                                 </div>

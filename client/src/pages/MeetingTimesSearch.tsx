@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MinistryCard } from '../components/MinistryCard';
 import { useMinistryData } from '../hooks/useMinistryData';
-import { LoadingState } from '../components/common/LoadingStates';
+import { LoadingState, SortControls } from '../components/common';
+import { useSort } from '../hooks';
 import { Ministry } from '../services/api';
+import { sortMinistries, SortOption } from '../utils';
 import {
     ClockIcon,
     CalendarDaysIcon,
@@ -16,7 +18,15 @@ export const MeetingTimesSearch: React.FC = () => {
     const [filteredMinistries, setFilteredMinistries] = useState<Ministry[]>([]);
     const [hasSearched, setHasSearched] = useState(false);
 
+    const { sortOption, sortConfig, updateSort } = useSort({ defaultSort: 'name-asc' });
     const { data: ministriesData, isLoading } = useMinistryData({ includePlaceholders: false });
+
+    // Sort the filtered ministries
+    const sortedFilteredMinistries = useMemo(() => {
+        return sortMinistries(filteredMinistries, sortConfig);
+    }, [filteredMinistries, sortConfig]);
+
+    const ministrySortOptions: SortOption[] = ['name-asc', 'name-desc', 'type-asc', 'type-desc'];
 
     const daysOfWeek = [
         'Monday', 'Tuesday', 'Wednesday', 'Thursday',
@@ -237,18 +247,27 @@ export const MeetingTimesSearch: React.FC = () => {
                                 <h2 className="text-lg font-semibold text-gray-900 mb-2">
                                     Search Results
                                 </h2>
-                                <p className="text-sm text-gray-600">
-                                    Found {filteredMinistries.length} {filteredMinistries.length === 1 ? 'ministry' : 'ministries'}
+                                <p className="text-sm text-gray-600 sr-only">
+                                    Found {sortedFilteredMinistries.length} {sortedFilteredMinistries.length === 1 ? 'ministry' : 'ministries'}
                                     {selectedDay && ` meeting on ${selectedDay}`}
                                     {selectedTime && ` around ${selectedTime}`}
                                 </p>
                             </div>
                         </div>
 
+                        <SortControls
+                            sortOption={sortOption}
+                            onSortChange={updateSort}
+                            availableOptions={ministrySortOptions}
+                            resultCount={sortedFilteredMinistries.length}
+                            itemType="ministries"
+                            className="mb-6"
+                        />
+
                         {/* Ministry Grid */}
-                        {filteredMinistries.length > 0 ? (
+                        {sortedFilteredMinistries.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filteredMinistries.map((ministry) => (
+                                {sortedFilteredMinistries.map((ministry) => (
                                     <MinistryCard key={ministry.id} ministry={ministry} />
                                 ))}
                             </div>

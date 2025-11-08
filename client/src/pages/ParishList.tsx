@@ -2,17 +2,48 @@ import React from 'react';
 import { Parish } from '../services/api';
 import { ParishCard } from '../components/ParishCard';
 import { useParishData } from '../hooks/useMinistryData';
-import { useSearch } from '../hooks/useSearch';
-import { SearchBar } from '../components/common/SearchBar';
-import { LoadingState, ErrorState } from '../components/common/LoadingStates';
+import { useSearch, useSort } from '../hooks';
+import { SearchBar, LoadingState, ErrorState, SortControls } from '../components/common';
+import { sortParishes, SortOption } from '../utils';
 import {
     BuildingLibraryIcon
 } from '@heroicons/react/24/outline';
 
 export const ParishList: React.FC = () => {
     const { searchQuery, setSearchQuery, handleSearch } = useSearch();
+    const { sortOption, sortConfig, updateSort } = useSort({ defaultSort: 'name-asc' });
 
     const { data: parishesData, isLoading, error } = useParishData();
+
+    const totalParishes = parishesData?.pagination?.total || 0;
+
+    // Available sort options for parishes (no type sorting for parishes)
+    const parishSortOptions: SortOption[] = ['name-asc', 'name-desc'];
+
+    // Filter parishes based on search query
+    const filteredParishes = React.useMemo(() => {
+        const parishData = parishesData?.parishes || [];
+        return parishData.filter((parish: Parish) => {
+            if (!searchQuery.trim()) return true;
+
+            const query = searchQuery.toLowerCase();
+            return (
+                parish.name.toLowerCase().includes(query) ||
+                parish.city.toLowerCase().includes(query) ||
+                parish.address.toLowerCase().includes(query) ||
+                parish.pastor?.toLowerCase().includes(query) ||
+                parish.diocese.name.toLowerCase().includes(query)
+            );
+        });
+    }, [parishesData?.parishes, searchQuery]);
+
+    // Sort filtered parishes
+    const sortedParishes = React.useMemo(() => {
+        return sortParishes(filteredParishes, {
+            field: sortConfig.field === 'type' ? 'city' : sortConfig.field as 'name' | 'city',
+            direction: sortConfig.direction
+        });
+    }, [filteredParishes, sortConfig]);
 
     if (isLoading) {
         return (
@@ -32,23 +63,6 @@ export const ParishList: React.FC = () => {
             </div>
         );
     }
-
-    const parishes = parishesData?.parishes || [];
-    const totalParishes = parishesData?.pagination?.total || 0;
-
-    // Filter parishes based on search query
-    const filteredParishes = parishes.filter((parish: Parish) => {
-        if (!searchQuery.trim()) return true;
-
-        const query = searchQuery.toLowerCase();
-        return (
-            parish.name.toLowerCase().includes(query) ||
-            parish.city.toLowerCase().includes(query) ||
-            parish.address.toLowerCase().includes(query) ||
-            parish.pastor?.toLowerCase().includes(query) ||
-            parish.diocese.name.toLowerCase().includes(query)
-        );
-    });
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -78,13 +92,21 @@ export const ParishList: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Stats */}
+                {/* Stats and Sort Controls */}
                 <div className="mb-8">
                     <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                        <SortControls
+                            sortOption={sortOption}
+                            onSortChange={updateSort}
+                            availableOptions={parishSortOptions}
+                            resultCount={sortedParishes.length}
+                            itemType="parishes"
+                            className="mb-4"
+                        />
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-gray-600">
-                                    Showing {filteredParishes.length} of {totalParishes} parishes
+                                <p className="text-sm text-gray-600 sr-only">
+                                    Showing {sortedParishes.length} of {totalParishes} parishes
                                 </p>
                                 {searchQuery && (
                                     <p className="text-xs text-gray-500 mt-1">
@@ -105,9 +127,9 @@ export const ParishList: React.FC = () => {
                 </div>
 
                 {/* Parish Grid */}
-                {filteredParishes.length > 0 ? (
+                {sortedParishes.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredParishes.map((parish: Parish) => (
+                        {sortedParishes.map((parish: Parish) => (
                             <ParishCard key={parish.id} parish={parish} />
                         ))}
                     </div>

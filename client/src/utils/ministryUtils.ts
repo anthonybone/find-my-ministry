@@ -1,4 +1,14 @@
-import { MinistryType } from '../services/api';
+import { MinistryType, Ministry, Parish } from '../services/api';
+
+/**
+ * Sorting types and options
+ */
+export type SortOption = 'name-asc' | 'name-desc' | 'type-asc' | 'type-desc';
+
+export interface SortConfig {
+    field: 'name' | 'type';
+    direction: 'asc' | 'desc';
+}
 
 /**
  * Ministry type display mapping utility
@@ -75,4 +85,75 @@ export const isPlaceholderMinistry = (ministry: { name: string; description?: st
     return placeholderKeywords.some(keyword =>
         name.includes(keyword) || description.includes(keyword)
     );
+};
+
+/**
+ * Sort ministries by specified criteria
+ */
+export const sortMinistries = (ministries: Ministry[], sortConfig: SortConfig): Ministry[] => {
+    const sorted = [...ministries].sort((a, b) => {
+        let comparison = 0;
+
+        switch (sortConfig.field) {
+            case 'name':
+                comparison = a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+                break;
+            case 'type':
+                const typeA = getMinistryTypeDisplay(a.type);
+                const typeB = getMinistryTypeDisplay(b.type);
+                comparison = typeA.localeCompare(typeB, undefined, { numeric: true, sensitivity: 'base' });
+                break;
+            default:
+                return 0;
+        }
+
+        return sortConfig.direction === 'desc' ? -comparison : comparison;
+    });
+
+    return sorted;
+};
+
+/**
+ * Sort parishes by specified criteria
+ */
+export const sortParishes = (parishes: Parish[], sortConfig: Omit<SortConfig, 'field'> & { field: 'name' | 'city' }): Parish[] => {
+    const sorted = [...parishes].sort((a, b) => {
+        let comparison = 0;
+
+        switch (sortConfig.field) {
+            case 'name':
+                comparison = a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+                break;
+            case 'city':
+                comparison = a.city.localeCompare(b.city, undefined, { numeric: true, sensitivity: 'base' });
+                break;
+            default:
+                return 0;
+        }
+
+        return sortConfig.direction === 'desc' ? -comparison : comparison;
+    });
+
+    return sorted;
+};
+
+/**
+ * Parse sort option string to sort config
+ */
+export const parseSortOption = (sortOption: SortOption): SortConfig => {
+    const [field, direction] = sortOption.split('-') as [SortConfig['field'], SortConfig['direction']];
+    return { field, direction };
+};
+
+/**
+ * Get display label for sort option
+ */
+export const getSortOptionLabel = (sortOption: SortOption): string => {
+    const labels: Record<SortOption, string> = {
+        'name-asc': 'Name (A-Z)',
+        'name-desc': 'Name (Z-A)',
+        'type-asc': 'Type (A-Z)',
+        'type-desc': 'Type (Z-A)'
+    };
+    return labels[sortOption];
 };
