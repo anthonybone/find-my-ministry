@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Ministry } from '../services/api';
+import { Ministry, Parish } from '../services/api';
 import { MinistryCard } from '../components/MinistryCard';
-import { useMinistryData } from '../hooks/useMinistryData';
+import { ParishCard } from '../components/ParishCard';
+import { Link } from 'react-router-dom';
+import { useMinistryData, useParishData } from '../hooks/useMinistryData';
 import { LoadingState } from '../components/common/LoadingStates';
 import { getMinistryTypeDisplay } from '../utils/ministryUtils';
 import {
@@ -18,25 +20,28 @@ delete (L.Icon.Default.prototype as any)._getIconUrl;
 
 // Custom styles for the map
 const mapStyles = `
-    .custom-ministry-marker {
+    .custom-ministry-marker, .custom-parish-marker {
         background: transparent !important;
         border: none !important;
     }
     
-    .ministry-popup .leaflet-popup-content-wrapper {
+    .ministry-popup .leaflet-popup-content-wrapper,
+    .parish-popup .leaflet-popup-content-wrapper {
         border-radius: 8px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         max-height: none !important;
         overflow: visible !important;
     }
     
-    .ministry-popup .leaflet-popup-content {
+    .ministry-popup .leaflet-popup-content,
+    .parish-popup .leaflet-popup-content {
         margin: 0 !important;
         max-height: none !important;
         overflow: visible !important;
     }
     
-    .ministry-popup .leaflet-popup-tip {
+    .ministry-popup .leaflet-popup-tip,
+    .parish-popup .leaflet-popup-tip {
         background: white;
     }
     
@@ -201,48 +206,53 @@ const MapEventHandler: React.FC<{ onMapClick: () => void }> = ({ onMapClick }) =
 
 export const MapView: React.FC = () => {
     const [selectedMinistry, setSelectedMinistry] = useState<Ministry | null>(null);
-    const [selectedParish, setSelectedParish] = useState<string | null>(null);
+    const [selectedParish, setSelectedParish] = useState<Parish | null>(null);
     const mapRef = useRef<L.Map>(null);
 
-    const { data: ministriesData, isLoading } = useMinistryData({
+    const { data: ministriesData, isLoading: isLoadingMinistries } = useMinistryData({
         includePlaceholders: process.env.NODE_ENV === 'development' && localStorage.getItem('showPlaceholders') === 'true'
     });
 
+    const { data: parishesData, isLoading: isLoadingParishes } = useParishData();
+
+    const isLoading = isLoadingMinistries || isLoadingParishes;
+
     // Calculate unique parishes and ministry counts
     const uniqueParishes = React.useMemo(() => {
-        if (!ministriesData?.ministries) return [];
-        const parishMap = new Map();
-        ministriesData.ministries.forEach(ministry => {
-            const parishKey = ministry.parish.id;
-            if (!parishMap.has(parishKey)) {
-                parishMap.set(parishKey, {
-                    ...ministry.parish,
-                    ministryCount: 0
-                });
-            }
-            parishMap.get(parishKey).ministryCount++;
-        });
-        return Array.from(parishMap.values());
-    }, [ministriesData]);
+        if (!parishesData?.parishes) return [];
+
+        // Get parish ministry counts from ministries data
+        const ministryCounts = new Map();
+        if (ministriesData?.ministries) {
+            ministriesData.ministries.forEach(ministry => {
+                const parishId = ministry.parish.id;
+                ministryCounts.set(parishId, (ministryCounts.get(parishId) || 0) + 1);
+            });
+        }
+
+        // Add ministry counts to parishes
+        return parishesData.parishes.map(parish => ({
+            ...parish,
+            ministryCount: ministryCounts.get(parish.id) || 0
+        }));
+    }, [parishesData, ministriesData]);
 
     const displayedMinistryCount = React.useMemo(() => {
         if (!selectedParish) {
             return ministriesData?.ministries?.length || 0;
         }
-        return ministriesData?.ministries?.filter(m => m.parish.id === selectedParish).length || 0;
+        return ministriesData?.ministries?.filter(m => m.parish.id === selectedParish.id).length || 0;
     }, [ministriesData, selectedParish]);
 
     const selectedParishName = React.useMemo(() => {
-        if (!selectedParish) return null;
-        const parish = uniqueParishes.find(p => p.id === selectedParish);
-        return parish?.name || null;
-    }, [selectedParish, uniqueParishes]);
+        return selectedParish?.name || null;
+    }, [selectedParish]);
 
-    const handleMarkerClick = (ministry: Ministry) => {
+    const handleMarkerClick = (parish: Parish) => {
         // Set selected parish and zoom to marker when clicked
-        setSelectedParish(ministry.parish.id);
+        setSelectedParish(parish);
         if (mapRef.current) {
-            mapRef.current.setView([ministry.parish.latitude, ministry.parish.longitude], 14, {
+            mapRef.current.setView([parish.latitude, parish.longitude], 14, {
                 animate: true,
                 duration: 0.5
             });
@@ -310,73 +320,74 @@ export const MapView: React.FC = () => {
                     maxZoom={18}
                 />
 
-                {ministriesData?.ministries?.map((ministry) => {
-                    // Create custom marker icon based on ministry type
-                    const getMarkerColor = (type: string) => {
-                        switch (type) {
-                            case 'YOUTH_MINISTRY': return '#10B981'; // Green
-                            case 'CHOIR_MUSIC': return '#8B5CF6'; // Purple
-                            case 'SOCIAL_JUSTICE': return '#F59E0B'; // Orange
-                            case 'MISSION_OUTREACH': return '#EF4444'; // Red
-                            case 'PASTORAL_CARE': return '#3B82F6'; // Blue
-                            case 'LITURGICAL_MINISTRY': return '#6366F1'; // Indigo
-                            default: return '#6B7280'; // Gray
-                        }
-                    };
+                {uniqueParishes.map((parish) => {
+                    // Simple blue dot marker for all parishes (no ministry count)
+                    const size = 12;
+                    const color = '#3B82F6'; // blue-500
 
                     const customIcon = L.divIcon({
-                        html: `<div style="background-color: ${getMarkerColor(ministry.type)}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
-                        className: 'custom-ministry-marker',
-                        iconSize: [24, 24],
-                        iconAnchor: [12, 12]
+                        html: `<div style="background-color: ${color}; width: ${size}px; height: ${size}px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.15);"></div>`,
+                        className: 'custom-parish-marker',
+                        iconSize: [size, size],
+                        iconAnchor: [size / 2, size / 2]
                     });
 
                     return (
                         <Marker
-                            key={ministry.id}
-                            position={[ministry.parish.latitude, ministry.parish.longitude]}
+                            key={parish.id}
+                            position={[parish.latitude, parish.longitude]}
                             icon={customIcon}
                             eventHandlers={{
-                                click: () => handleMarkerClick(ministry),
+                                click: () => handleMarkerClick(parish),
                             }}
                         >
-                            <Popup maxWidth={400} className="ministry-popup">
+                            <Popup maxWidth={400} className="parish-popup">
                                 <div className="p-4">
                                     <div className="flex items-start justify-between mb-3">
                                         <h3 className="font-bold text-lg text-gray-900 flex-1 pr-2">
-                                            {ministry.name}
+                                            {parish.name}
                                         </h3>
-                                        <span className="text-xs px-2 py-1 bg-primary-100 text-primary-700 rounded-full whitespace-nowrap font-medium">
-                                            {getMinistryTypeDisplay(ministry.type)}
+                                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full whitespace-nowrap font-medium">
+                                            Parish
                                         </span>
                                     </div>
                                     <div className="space-y-3">
-                                        <div className="flex items-center text-sm text-gray-600">
-                                            <span className="font-semibold">📍 {ministry.parish.name}</span>
-                                        </div>
                                         <div className="text-sm text-gray-600 font-medium">
-                                            {ministry.parish.address}, {ministry.parish.city}
+                                            📍 {parish.address}, {parish.city}, {parish.state} {parish.zipCode}
                                         </div>
-                                        {ministry.description && (
-                                            <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded border-l-3 border-primary-300 leading-relaxed">
-                                                {ministry.description}
-                                            </p>
-                                        )}
-                                        <div className="flex items-center justify-between pt-2 border-t">
-                                            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                                Ages: {ministry.ageGroups.join(', ')}
+                                        {parish.pastor && (
+                                            <div className="text-sm text-gray-600">
+                                                <span className="font-semibold">Pastor:</span> {parish.pastor}
                                             </div>
+                                        )}
+                                        {parish.phone && (
+                                            <div className="text-sm text-gray-600">
+                                                <span className="font-semibold">Phone:</span> {parish.phone}
+                                            </div>
+                                        )}
+                                        <div className="flex gap-2 pt-2 border-t">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedParish(parish);
+                                                }}
+                                                className="flex-1 text-sm bg-primary-600 text-white px-4 py-2.5 rounded-lg hover:bg-primary-700 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2"
+                                            >
+                                                <span>🏛️</span>
+                                                View Parish
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    // Navigate to list view filtered by this parish
+                                                    window.location.href = `/list?parish=${parish.id}`;
+                                                }}
+                                                className="flex-1 text-sm bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2"
+                                            >
+                                                <span>📋</span>
+                                                View Ministries
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedMinistry(ministry);
-                                            }}
-                                            className="w-full text-sm bg-primary-600 text-white px-4 py-2.5 rounded-lg hover:bg-primary-700 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2"
-                                        >
-                                            <span>📋</span>
-                                            View Full Details
-                                        </button>
                                     </div>
                                 </div>
                             </Popup>
@@ -432,29 +443,18 @@ export const MapView: React.FC = () => {
 
             {/* Map Info Panel */}
             <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-4 z-[1000] max-w-xs">
-                <h3 className="font-semibold mb-2 text-sm">🗺️ Interactive Map</h3>
-                <div className="text-sm text-gray-600 mb-2 space-y-1">
+                <h3 className="font-semibold mb-2 text-sm">🗺️ Parish Map</h3>
+                <div className="text-sm text-gray-600 mb-2">
                     <div>
-                        <span className="font-medium text-green-600">{displayedMinistryCount}</span> ministries
-                        {selectedParish && selectedParishName && (
-                            <span className="text-blue-600 font-medium"> in {selectedParishName}</span>
-                        )}
+                        <span className="font-medium text-blue-600">{uniqueParishes.length}</span> parishes displayed
                     </div>
                     <div>
-                        <span className="font-medium text-blue-600">{uniqueParishes.length}</span> parishes total
+                        <span className="font-medium text-green-600">{ministriesData?.ministries?.length || 0}</span> ministries total
                     </div>
-                    {selectedParish && (
-                        <button
-                            onClick={() => setSelectedParish(null)}
-                            className="text-xs text-gray-500 hover:text-gray-700 underline"
-                        >
-                            Show all ministries
-                        </button>
-                    )}
                 </div>
-                <div className="text-xs text-gray-500 space-y-1">
-                    <div>📍 Click markers to select parish</div>
-                    <div>📋 Click "View Details" for full info</div>
+                <div className="text-xs text-gray-500 space-y-1 mb-3">
+                    <div>🏛️ Click markers to view a brief parish summary</div>
+                    <div>📋 Use Ministries button in the popup to view ministries</div>
                     <div>🗺️ Drag to pan around</div>
                     <div>🔍 Scroll wheel to zoom</div>
                 </div>
