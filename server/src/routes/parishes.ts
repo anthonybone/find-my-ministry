@@ -152,6 +152,16 @@ router.get('/:id/ministries', async (req, res) => {
 
         const ministries = await prisma.ministry.findMany({
             where,
+            include: {
+                parish: {
+                    select: {
+                        id: true,
+                        name: true,
+                        city: true,
+                        state: true
+                    }
+                }
+            },
             orderBy: { name: 'asc' }
         });
 

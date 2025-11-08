@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Parish, parishApi, Ministry } from '../services/api';
+import { MinistryCard } from '../components/MinistryCard';
 import { useScrollToTop } from '../hooks/useScrollToTop';
 import {
     MapPinIcon,
@@ -108,23 +109,23 @@ export const ParishDetail: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Parish Header */}
-                <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-                    <div className="flex items-start justify-between mb-6">
+                {/* Parish Header - Larger and more prominent */}
+                <div className="bg-white rounded-lg shadow-xl p-10 mb-8 transform scale-105 origin-center">
+                    <div className="flex items-start justify-between mb-8">
                         <div className="flex-1">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            <h1 className="text-4xl font-bold text-gray-900 mb-3">
                                 {parish.name}
                             </h1>
                             {parish.pastor && (
-                                <p className="text-lg text-gray-600 mb-2">
+                                <p className="text-xl text-gray-600 mb-3">
                                     Pastor: {parish.pastor}
                                 </p>
                             )}
-                            <p className="text-sm text-gray-500">
+                            <p className="text-base text-gray-500">
                                 Diocese of {parish.diocese.name}
                             </p>
                         </div>
-                        <BuildingLibraryIcon className="h-12 w-12 text-primary-600 flex-shrink-0 ml-6" />
+                        <BuildingLibraryIcon className="h-16 w-16 text-primary-600 flex-shrink-0 ml-6" />
                     </div>
 
                     {/* Contact Information */}
@@ -178,72 +179,28 @@ export const ParishDetail: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Ministries Section */}
-                <div className="bg-white rounded-lg shadow-lg p-8">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">Ministries</h2>
-                        <div className="flex items-center">
-                            <UsersIcon className="h-5 w-5 text-primary-600 mr-2" />
-                            <span className="text-gray-600">
-                                {ministries.length} {ministries.length === 1 ? 'Ministry' : 'Ministries'}
-                            </span>
-                        </div>
+                {/* Divider */}
+                <div className="relative mb-8">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300"></div>
                     </div>
+                    <div className="relative flex justify-center">
+                        <span className="bg-gray-50 px-6 py-2 text-lg text-gray-500 font-medium rounded-full">
+                            {ministries.length > 0 ? `${ministries.length} ${ministries.length === 1 ? 'Ministry' : 'Ministries'}` : 'No Ministries'}
+                        </span>
+                    </div>
+                </div>
 
-                    {ministries.length > 0 ? (
-                        <div className="space-y-4">
+                {/* Ministries Section */}
+                {ministries.length > 0 ? (
+                    <div className="space-y-4">
+                        <div className="grid gap-4">
                             {ministries.map((ministry) => (
-                                <div
-                                    key={ministry.id}
-                                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                                >
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex-1">
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                                {ministry.name}
-                                            </h3>
-                                            {ministry.description && (
-                                                <p className="text-gray-600 mb-2">{ministry.description}</p>
-                                            )}
-                                            <div className="flex flex-wrap gap-2 mb-2">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                                                    {ministry.type.replace(/_/g, ' ')}
-                                                </span>
-                                                {ministry.ageGroups.map((ageGroup) => (
-                                                    <span
-                                                        key={ageGroup}
-                                                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                                                    >
-                                                        {ageGroup.replace(/_/g, ' ')}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                            {ministry.contactName && (
-                                                <p className="text-sm text-gray-500">
-                                                    Contact: {ministry.contactName}
-                                                    {ministry.contactPhone && ` • ${ministry.contactPhone}`}
-                                                    {ministry.contactEmail && ` • ${ministry.contactEmail}`}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <Link
-                                            to={`/ministry/${ministry.id}`}
-                                            className="ml-4 px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors"
-                                        >
-                                            View Details
-                                        </Link>
-                                    </div>
+                                <div key={ministry.id} className="transform scale-95 origin-center">
+                                    <MinistryCard ministry={ministry} />
                                 </div>
                             ))}
                         </div>
-                    ) : (
-                        <div className="text-center py-8">
-                            <UsersIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500">No ministries currently available at this parish.</p>
-                        </div>
-                    )}
-
-                    {ministries.length > 0 && (
                         <div className="mt-6 text-center">
                             <Link
                                 to={`/list?parish=${parish.id}`}
@@ -252,8 +209,20 @@ export const ParishDetail: React.FC = () => {
                                 View All Ministries
                             </Link>
                         </div>
-                    )}
-                </div>
+                    </div>
+                ) : (
+                    <div className="text-center py-8">
+                        <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-200">
+                            <UsersIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                No Ministries Available
+                            </h3>
+                            <p className="text-gray-600 max-w-md mx-auto">
+                                This parish doesn't have any ministries listed yet. Check back later or contact the parish directly.
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
