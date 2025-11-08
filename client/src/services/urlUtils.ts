@@ -11,12 +11,12 @@ export interface ParamMap {
  */
 export const buildUrlParams = (params: ParamMap): URLSearchParams => {
     const urlParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
         if (value === undefined || value === null) {
             return;
         }
-        
+
         if (Array.isArray(value)) {
             if (value.length > 0) {
                 urlParams.append(key, value.join(','));
@@ -25,7 +25,7 @@ export const buildUrlParams = (params: ParamMap): URLSearchParams => {
             urlParams.append(key, value.toString());
         }
     });
-    
+
     return urlParams;
 };
 
@@ -36,9 +36,9 @@ export const buildApiUrl = (endpoint: string, params?: ParamMap): string => {
     if (!params || Object.keys(params).length === 0) {
         return endpoint;
     }
-    
+
     const urlParams = buildUrlParams(params);
     const paramString = urlParams.toString();
-    
+
     return paramString ? `${endpoint}?${paramString}` : endpoint;
 };

@@ -25,7 +25,7 @@ export class MinistryQueryBuilder {
 
     static fromFilters(filters: MinistryQueryFilters): MinistryQueryBuilder {
         const builder = new MinistryQueryBuilder();
-        
+
         // Basic filters
         if (filters.parishId) {
             builder.where.parishId = filters.parishId;
@@ -119,16 +119,16 @@ export const getMinistryInclude = (): Prisma.MinistryInclude => ({
 export const sortMinistriesByRelevance = (ministries: any[]): any[] => {
     return ministries.sort((a, b) => {
         // Sort non-placeholder ministries first
-        const aIsPlaceholder = a.name.includes('[PLACEHOLDER]') || 
-                              a.name.includes('FAKE') || 
-                              a.contactEmail?.includes('PLACEHOLDER@example.com');
-        const bIsPlaceholder = b.name.includes('[PLACEHOLDER]') || 
-                              b.name.includes('FAKE') || 
-                              b.contactEmail?.includes('PLACEHOLDER@example.com');
+        const aIsPlaceholder = a.name.includes('[PLACEHOLDER]') ||
+            a.name.includes('FAKE') ||
+            a.contactEmail?.includes('PLACEHOLDER@example.com');
+        const bIsPlaceholder = b.name.includes('[PLACEHOLDER]') ||
+            b.name.includes('FAKE') ||
+            b.contactEmail?.includes('PLACEHOLDER@example.com');
 
         if (aIsPlaceholder && !bIsPlaceholder) return 1;
         if (!aIsPlaceholder && bIsPlaceholder) return -1;
-        
+
         // Then sort by name alphabetically
         return a.name.localeCompare(b.name);
     });

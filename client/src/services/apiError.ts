@@ -29,7 +29,7 @@ export const handleApiError = (error: any): never => {
         const { status, data } = error.response;
         const message = data?.message || data?.error || 'An error occurred';
         const code = data?.code;
-        
+
         throw new ApiError(message, status, code);
     } else if (error.request) {
         // The request was made but no response was received

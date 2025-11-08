@@ -8,8 +8,8 @@ import {
     EnvelopeIcon
 } from '@heroicons/react/24/outline';
 import { Ministry } from '../services/api';
-import { 
-    getMinistryTypeDisplay, 
+import {
+    getMinistryTypeDisplay,
     formatScheduleDisplay,
     getMinistryCardStyle,
     getMinistryBadgeClass,

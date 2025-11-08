@@ -40,7 +40,7 @@ export const getMinistryCardStyle = (type: MinistryType): string => {
         'TEST': 'border-l-4 border-l-red-400',
         'OTHER': 'border-l-4 border-l-gray-400'
     };
-    
+
     return cardStyles[type] || 'border-l-4 border-l-gray-400';
 };
 
@@ -80,6 +80,6 @@ export const getMinistryBadgeClass = (type: MinistryType): string => {
         'TEST': 'ministry-badge default',
         'OTHER': 'ministry-badge default'
     };
-    
+
     return badgeClasses[type] || 'ministry-badge default';
 };
