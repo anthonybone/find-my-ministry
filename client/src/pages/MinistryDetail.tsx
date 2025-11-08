@@ -32,6 +32,8 @@ export const MinistryDetail: React.FC = () => {
             try {
                 setLoading(true);
                 const data = await ministryApi.getById(id);
+                console.log('Ministry data:', data);
+                console.log('Parish data:', data.parish);
                 setMinistry(data);
             } catch (err: any) {
                 console.error('Error fetching ministry:', err);
@@ -163,16 +165,21 @@ export const MinistryDetail: React.FC = () => {
                                     </span>
                                 </div>
                                 <h1 className="text-3xl font-bold text-white mb-2">{ministry.name}</h1>
-                                <div className="flex items-center text-primary-100">
-                                    <MapPinIcon className="h-5 w-5 mr-2" />
-                                    <Link
-                                        to={`/parish-view/${ministry.parish.id}`}
-                                        className="text-primary-100 hover:text-white transition-colors font-medium"
-                                    >
-                                        {ministry.parish.name}
-                                    </Link>
-                                    <span className="mx-2">•</span>
-                                    <span>{ministry.parish.city}</span>
+                                <div className="text-primary-100">
+                                    <div className="flex items-center mb-1">
+                                        <MapPinIcon className="h-5 w-5 mr-2" />
+                                        <Link
+                                            to={`/parish-view/${ministry.parish.id}`}
+                                            className="text-primary-100 hover:text-white transition-colors font-medium"
+                                        >
+                                            {ministry.parish.name}
+                                        </Link>
+                                    </div>
+                                    <div className="ml-7 text-sm text-primary-200">
+                                        {ministry.parish.address}
+                                        <br />
+                                        {ministry.parish.city}, {ministry.parish.state} {ministry.parish.zipCode}
+                                    </div>
                                 </div>
                             </div>
                             {ministry.requiresRegistration && (
