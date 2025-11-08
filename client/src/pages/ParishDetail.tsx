@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Parish, parishApi, Ministry } from '../services/api';
+import { useScrollToTop } from '../hooks/useScrollToTop';
 import {
     MapPinIcon,
     PhoneIcon,
@@ -17,6 +18,9 @@ export const ParishDetail: React.FC = () => {
     const [ministries, setMinistries] = useState<Ministry[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Ensure page scrolls to top when parish ID changes
+    useScrollToTop([id]);
 
     useEffect(() => {
         const fetchParishData = async () => {

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Parish } from '../services/api';
 import { ParishCard } from '../components/ParishCard';
 import { useParishData } from '../hooks/useMinistryData';
+import { useScrollToTop } from '../hooks/useScrollToTop';
 import { LoadingState, ErrorState } from '../components/common/LoadingStates';
 import {
     BuildingLibraryIcon,
@@ -13,6 +14,9 @@ export const SingleParishView: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { data: parishesData, isLoading, error } = useParishData();
+
+    // Ensure page scrolls to top when parish ID changes
+    useScrollToTop([id]);
 
     const handleBack = () => {
         navigate(-1); // Go back to previous page

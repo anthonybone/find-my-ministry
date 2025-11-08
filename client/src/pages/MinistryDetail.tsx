@@ -17,6 +17,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { ministryApi, Ministry } from '../services/api';
 import { getMinistryTypeDisplay, formatScheduleDisplay } from '../utils/ministryUtils';
+import { useScrollToTop } from '../hooks/useScrollToTop';
 
 export const MinistryDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -24,6 +25,9 @@ export const MinistryDetail: React.FC = () => {
     const [ministry, setMinistry] = useState<Ministry | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Ensure page scrolls to top when ministry ID changes
+    useScrollToTop([id]);
 
     useEffect(() => {
         const fetchMinistry = async () => {
