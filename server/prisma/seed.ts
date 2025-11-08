@@ -1,24 +1,37 @@
-import { PrismaClient, MinistryType, AgeGroup } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { dioceses } from './data/dioceses';
+import { parishes } from './data/parishes';
+import { placeholderMinistries, realMinistries } from './data/ministries';
 
 const prisma = new PrismaClient();
 
+// Environment flag to control whether to seed placeholder (fake) data
+// Set SEED_INCLUDE_PLACEHOLDERS=false in production
+const SEED_INCLUDE_PLACEHOLDERS = process.env.SEED_INCLUDE_PLACEHOLDERS !== 'false';
+
 async function main() {
     console.log('🌱 Starting seed process...');
+    console.log(`📋 Placeholder data: ${SEED_INCLUDE_PLACEHOLDERS ? 'ENABLED' : 'DISABLED'}`);
 
-    // Create LA Diocese
-    const laDiocese = await prisma.diocese.upsert({
-        where: { name: 'Archdiocese of Los Angeles' },
-        update: {},
-        create: {
-            name: 'Archdiocese of Los Angeles',
-            location: 'Los Angeles, California',
-            website: 'https://lacatholics.org',
-            phone: '(213) 637-7000',
-            email: 'info@lacatholics.org',
-        },
-    });
+    // Seed dioceses
+    console.log('\n📍 Seeding dioceses...');
+    const seededDioceses = [];
+    for (const dioceseData of dioceses) {
+        const diocese = await prisma.diocese.upsert({
+            where: { name: dioceseData.name },
+            update: {
+                location: dioceseData.location,
+                website: dioceseData.website,
+                phone: dioceseData.phone,
+                email: dioceseData.email,
+            },
+            create: dioceseData,
+        });
+        seededDioceses.push(diocese);
+        console.log(`  ✅ ${diocese.name}`);
+    }
 
-    console.log('✅ Created/found LA Diocese');
+    const laDiocese = seededDioceses[0]; // Primary diocese for this seed
 
     // Sample parishes in LA area
     const parishes = [
