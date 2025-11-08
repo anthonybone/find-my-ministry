@@ -54,10 +54,19 @@ export const SearchResults: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
+            console.log('Performing search for:', searchQuery);
+            console.log('Search API base URL:', process.env.REACT_APP_API_URL || '/api');
             const searchResults = await searchApi.search({ query: searchQuery });
+            console.log('Search results:', searchResults);
             setResults(searchResults);
         } catch (err) {
             console.error('Search error:', err);
+            console.error('Error details:', {
+                message: err instanceof Error ? err.message : 'Unknown error',
+                stack: err instanceof Error ? err.stack : undefined,
+                response: (err as any)?.response?.data,
+                status: (err as any)?.response?.status,
+            });
             setError('Failed to perform search. Please try again.');
         } finally {
             setIsLoading(false);
