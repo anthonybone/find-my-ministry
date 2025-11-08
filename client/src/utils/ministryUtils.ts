@@ -1,4 +1,19 @@
+/**
+ * Ministry utility functions and type definitions
+ * 
+ * This module provides utilities for:
+ * - Ministry type display mapping
+ * - Schedule formatting
+ * - Placeholder detection  
+ * - Sorting operations
+ * - String parsing
+ * 
+ * @author Find My Ministry Team
+ * @version 1.0.0
+ */
+
 import { MinistryType, Ministry, Parish } from '../services/api';
+import { DEV_CONFIG } from './constants';
 
 /**
  * Sorting types and options
@@ -51,6 +66,12 @@ export const MINISTRY_TYPE_DISPLAY: Record<MinistryType, string> = {
 
 /**
  * Get human-readable display name for ministry type
+ * 
+ * @param type - The ministry type enum value
+ * @returns Human-readable string representation
+ * 
+ * @example
+ * getMinistryTypeDisplay('YOUTH_MINISTRY') // returns 'Youth Ministry'
  */
 export const getMinistryTypeDisplay = (type: MinistryType): string => {
     return MINISTRY_TYPE_DISPLAY[type] || type;
@@ -78,17 +99,23 @@ export const formatScheduleDisplay = (schedule: any): string => {
  * Check if ministry is a placeholder
  */
 export const isPlaceholderMinistry = (ministry: { name: string; description?: string }): boolean => {
-    const placeholderKeywords = ['placeholder', 'example', 'sample', 'test', 'demo'];
     const name = ministry.name.toLowerCase();
     const description = ministry.description?.toLowerCase() || '';
 
-    return placeholderKeywords.some(keyword =>
+    return DEV_CONFIG.PLACEHOLDER_KEYWORDS.some(keyword =>
         name.includes(keyword) || description.includes(keyword)
     );
 };
 
 /**
- * Sort ministries by specified criteria
+ * Sort ministries by specified criteria with locale-aware comparison
+ * 
+ * @param ministries - Array of ministry objects to sort
+ * @param sortConfig - Configuration object specifying field and direction
+ * @returns New sorted array (does not mutate original)
+ * 
+ * @example
+ * sortMinistries(ministries, { field: 'name', direction: 'asc' })
  */
 export const sortMinistries = (ministries: Ministry[], sortConfig: SortConfig): Ministry[] => {
     const sorted = [...ministries].sort((a, b) => {

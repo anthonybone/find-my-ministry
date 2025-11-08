@@ -1,5 +1,6 @@
 import { useQuery } from 'react-query';
 import { ministryApi, parishApi } from '../services/api';
+import { CACHE_TIMES } from '../utils/constants';
 
 interface UseMinistryDataOptions {
     includePlaceholders?: boolean;
@@ -13,8 +14,8 @@ export const useMinistryData = (options: UseMinistryDataOptions = {}) => {
         ['ministries', { includePlaceholders, parishId }],
         () => ministryApi.getAll({ includePlaceholders, parishId }),
         {
-            staleTime: 5 * 60 * 1000, // 5 minutes
-            cacheTime: 10 * 60 * 1000, // 10 minutes
+            staleTime: CACHE_TIMES.MINISTRIES,
+            cacheTime: CACHE_TIMES.MINISTRIES * 2,
         }
     );
 };
@@ -24,8 +25,8 @@ export const useParishData = () => {
         'parishes',
         () => parishApi.getAll(),
         {
-            staleTime: 10 * 60 * 1000, // 10 minutes
-            cacheTime: 20 * 60 * 1000, // 20 minutes
+            staleTime: CACHE_TIMES.PARISHES,
+            cacheTime: CACHE_TIMES.PARISHES * 2,
         }
     );
 };

@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { MagnifyingGlassIcon, ClockIcon, MapPinIcon, BuildingLibraryIcon } from '@heroicons/react/24/outline';
 import { searchApi } from '../../services/api';
+import { API_CONFIG } from '../../utils/constants';
+import { useDebounce } from '../../hooks';
 
 interface SearchBarProps {
     searchQuery: string;
@@ -28,30 +30,30 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const inputRef = useRef<HTMLInputElement>(null);
     const suggestionsRef = useRef<HTMLDivElement>(null);
 
+    // Debounced suggestion fetching
+    const debouncedGetSuggestions = useDebounce(async (query: string) => {
+        if (query.length >= API_CONFIG.SEARCH_MIN_QUERY_LENGTH) {
+            setIsLoading(true);
+            try {
+                const result = await searchApi.getSuggestions(query);
+                setSuggestions(result.suggestions || []);
+                setShowSuggestions(true);
+            } catch (error) {
+                console.error('Failed to get suggestions:', error);
+                setSuggestions([]);
+            } finally {
+                setIsLoading(false);
+            }
+        } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
+        }
+    }, API_CONFIG.SEARCH_DEBOUNCE_MS);
+
     // Get suggestions when user types
     useEffect(() => {
-        const getSuggestions = async () => {
-            if (searchQuery.length >= 2) {
-                setIsLoading(true);
-                try {
-                    const result = await searchApi.getSuggestions(searchQuery);
-                    setSuggestions(result.suggestions || []);
-                    setShowSuggestions(true);
-                } catch (error) {
-                    console.error('Failed to get suggestions:', error);
-                    setSuggestions([]);
-                } finally {
-                    setIsLoading(false);
-                }
-            } else {
-                setSuggestions([]);
-                setShowSuggestions(false);
-            }
-        };
-
-        const timeoutId = setTimeout(getSuggestions, 200); // Debounce
-        return () => clearTimeout(timeoutId);
-    }, [searchQuery]);
+        debouncedGetSuggestions(searchQuery);
+    }, [searchQuery, debouncedGetSuggestions]);
 
     // Close suggestions when clicking outside
     useEffect(() => {
@@ -77,18 +79,21 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         onSearch(fakeEvent);
     };
 
-    const getSuggestionIcon = (type: string) => {
-        switch (type) {
-            case 'ministry':
-                return <span className="text-sm">⛪</span>;
-            case 'parish':
-                return <BuildingLibraryIcon className="h-4 w-4 text-blue-500" />;
-            case 'location':
-                return <MapPinIcon className="h-4 w-4 text-green-500" />;
-            default:
-                return <ClockIcon className="h-4 w-4 text-gray-400" />;
-        }
-    };
+    // Memoized suggestion icon function to avoid recreating on each render
+    const getSuggestionIcon = useMemo(() => {
+        return (type: string) => {
+            switch (type) {
+                case 'ministry':
+                    return <span className="text-sm">⛪</span>;
+                case 'parish':
+                    return <BuildingLibraryIcon className="h-4 w-4 text-blue-500" />;
+                case 'location':
+                    return <MapPinIcon className="h-4 w-4 text-green-500" />;
+                default:
+                    return <ClockIcon className="h-4 w-4 text-gray-400" />;
+            }
+        };
+    }, []);
 
     const handleInputFocus = () => {
         if (suggestions.length > 0) {

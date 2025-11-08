@@ -8,66 +8,19 @@ import {
     EnvelopeIcon
 } from '@heroicons/react/24/outline';
 import { Ministry } from '../services/api';
-import { getMinistryTypeDisplay, formatScheduleDisplay } from '../utils/ministryUtils';
+import { 
+    getMinistryTypeDisplay, 
+    formatScheduleDisplay,
+    getMinistryCardStyle,
+    getMinistryBadgeClass,
+    getAgeGroupDisplay
+} from '../utils';
 
 interface MinistryCardProps {
     ministry: Ministry;
 }
 
-const getAgeGroupDisplay = (ageGroups: string[]): string => {
-    const ageGroupMap: { [key: string]: string } = {
-        'CHILDREN': 'Children',
-        'TEENAGERS': 'Teenagers',
-        'YOUNG_ADULTS': 'Young Adults',
-        'ADULTS': 'Adults',
-        'SENIORS': 'Seniors',
-        'FAMILIES': 'Families',
-        'ALL_AGES': 'All Ages'
-    };
-    return ageGroups.map(ag => ageGroupMap[ag] || ag).join(', ');
-};
-
-
-
-const getMinistryCardStyle = (type: string): string => {
-    const cardStyles: { [key: string]: string } = {
-        'YOUTH_MINISTRY': 'border-l-4 border-l-green-400',
-        'YOUNG_ADULT': 'border-l-4 border-l-green-400',
-        'ADULT_EDUCATION': 'border-l-4 border-l-indigo-400',
-        'BIBLE_STUDY': 'border-l-4 border-l-indigo-400',
-        'PRAYER_GROUP': 'border-l-4 border-l-yellow-400',
-        'SENIORS_MINISTRY': 'border-l-4 border-l-purple-400',
-        'FOOD_PANTRY': 'border-l-4 border-l-orange-400',
-        'COMMUNITY_SERVICE': 'border-l-4 border-l-orange-400',
-        'SOCIAL_JUSTICE': 'border-l-4 border-l-orange-400',
-        'MARRIAGE_FAMILY': 'border-l-4 border-l-pink-400',
-        'RCIA': 'border-l-4 border-l-indigo-400',
-        'RELIGIOUS_EDUCATION': 'border-l-4 border-l-indigo-400',
-        'TEST': 'border-l-4 border-l-red-400'
-    };
-    return cardStyles[type] || 'border-l-4 border-l-gray-400';
-};
-
-const getMinistryBadgeClass = (type: string): string => {
-    const badgeClasses: { [key: string]: string } = {
-        'YOUTH_MINISTRY': 'ministry-badge youth',
-        'YOUNG_ADULT': 'ministry-badge youth',
-        'ADULT_EDUCATION': 'ministry-badge education',
-        'BIBLE_STUDY': 'ministry-badge education',
-        'PRAYER_GROUP': 'ministry-badge prayer',
-        'SENIORS_MINISTRY': 'ministry-badge seniors',
-        'FOOD_PANTRY': 'ministry-badge service',
-        'COMMUNITY_SERVICE': 'ministry-badge service',
-        'SOCIAL_JUSTICE': 'ministry-badge service',
-        'MARRIAGE_FAMILY': 'ministry-badge family',
-        'RCIA': 'ministry-badge education',
-        'RELIGIOUS_EDUCATION': 'ministry-badge education',
-        'TEST': 'ministry-badge default'
-    };
-    return badgeClasses[type] || 'ministry-badge default';
-};
-
-export const MinistryCard: React.FC<MinistryCardProps> = ({ ministry }) => {
+export const MinistryCard: React.FC<MinistryCardProps> = React.memo(({ ministry }) => {
     return (
         <Link
             to={`/ministry/${ministry.id}`}
@@ -165,4 +118,6 @@ export const MinistryCard: React.FC<MinistryCardProps> = ({ ministry }) => {
             </div>
         </Link>
     );
-};
+});
+
+MinistryCard.displayName = 'MinistryCard';

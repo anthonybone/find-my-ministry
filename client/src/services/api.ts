@@ -1,5 +1,22 @@
-import axios from 'axios';
+/**
+ * Main API service for Find My Ministry application
+ * 
+ * This file contains all API communication logic including:
+ * - Type definitions for data models
+ * - API endpoint functions with proper error handling
+ * - Consistent parameter building for requests
+ * 
+ * @author Find My Ministry Team
+ * @version 1.0.0
+ */
 
+import axios from 'axios';
+import { handleApiError } from './apiError';
+import { buildApiUrl } from './urlUtils';
+
+/**
+ * Base API configuration
+ */
 const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 const api = axios.create({
@@ -9,7 +26,9 @@ const api = axios.create({
     },
 });
 
-// Types
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
 export interface Diocese {
     id: string;
     name: string;
@@ -134,51 +153,87 @@ export interface PaginatedResponse<T> {
     };
 }
 
-// API Functions
+// ============================================================================
+// API FUNCTIONS
+// ============================================================================
+
+/**
+ * Ministry API endpoints
+ * Provides full CRUD operations for ministry data
+ */
 export const ministryApi = {
     getAll: async (filters?: SearchFilters): Promise<{ ministries: Ministry[]; pagination: any }> => {
-        const params = new URLSearchParams();
-        if (filters?.query) params.append('search', filters.query);
-        if (filters?.type) params.append('type', filters.type);
-        if (filters?.location) params.append('location', filters.location);
-        if (filters?.parishId) params.append('parishId', filters.parishId);
-        if (filters?.ageGroups) params.append('ageGroups', filters.ageGroups.join(','));
-        if (filters?.languages) params.append('languages', filters.languages.join(','));
-        if (filters?.includePlaceholders) params.append('includePlaceholders', filters.includePlaceholders.toString());
-        if (filters?.limit) params.append('limit', filters.limit.toString());
-        if (filters?.offset) params.append('offset', filters.offset.toString());
+        try {
+            const url = buildApiUrl('/ministries', {
+                search: filters?.query,
+                type: filters?.type,
+                location: filters?.location,
+                parishId: filters?.parishId,
+                ageGroups: filters?.ageGroups,
+                languages: filters?.languages,
+                includePlaceholders: filters?.includePlaceholders,
+                limit: filters?.limit,
+                offset: filters?.offset
+            });
 
-        const response = await api.get(`/ministries?${params.toString()}`);
-        return response.data;
+            const response = await api.get(url);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
     },
 
     getById: async (id: string): Promise<Ministry> => {
-        const response = await api.get(`/ministries/${id}`);
-        return response.data;
+        try {
+            const response = await api.get(`/ministries/${id}`);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
     },
 
     getTypes: async (): Promise<MinistryType[]> => {
-        const response = await api.get('/ministries/meta/types');
-        return response.data;
+        try {
+            const response = await api.get('/ministries/meta/types');
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
     },
 
     getAgeGroups: async (): Promise<AgeGroup[]> => {
-        const response = await api.get('/ministries/meta/age-groups');
-        return response.data;
+        try {
+            const response = await api.get('/ministries/meta/age-groups');
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
     },
 
     create: async (ministryData: Omit<Ministry, 'id' | 'createdAt' | 'updatedAt' | 'parish'>): Promise<Ministry> => {
-        const response = await api.post('/ministries', ministryData);
-        return response.data;
+        try {
+            const response = await api.post('/ministries', ministryData);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
     },
 
     update: async (id: string, ministryData: Partial<Omit<Ministry, 'id' | 'createdAt' | 'updatedAt' | 'parish'>>): Promise<Ministry> => {
-        const response = await api.put(`/ministries/${id}`, ministryData);
-        return response.data;
+        try {
+            const response = await api.put(`/ministries/${id}`, ministryData);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
     },
 
     delete: async (id: string): Promise<void> => {
-        await api.delete(`/ministries/${id}`);
+        try {
+            await api.delete(`/ministries/${id}`);
+        } catch (error) {
+            handleApiError(error);
+        }
     }
 };
 
