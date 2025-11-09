@@ -366,27 +366,26 @@ export const MapView: React.FC = () => {
                                             </div>
                                         )}
                                         <div className="flex gap-2 pt-2 border-t">
-                                            <button
+                                            <Link
+                                                to={`/parish/${parish.id}`}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    setSelectedParish(parish);
                                                 }}
-                                                className="flex-1 text-sm bg-primary-600 text-white px-4 py-2.5 rounded-lg hover:bg-primary-700 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2"
+                                                className="flex-1 text-sm bg-primary-600 !text-white px-4 py-2.5 rounded-lg hover:bg-primary-700 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2 no-underline"
                                             >
                                                 <span>🏛️</span>
                                                 View Parish
-                                            </button>
-                                            <button
+                                            </Link>
+                                            <Link
+                                                to={`/list?parish=${parish.id}`}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    // Navigate to list view filtered by this parish
-                                                    window.location.href = `/list?parish=${parish.id}`;
                                                 }}
-                                                className="flex-1 text-sm bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2"
+                                                className="flex-1 text-sm bg-green-600 !text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2 no-underline"
                                             >
                                                 <span>📋</span>
                                                 View Ministries
-                                            </button>
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>
